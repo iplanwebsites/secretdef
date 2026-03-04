@@ -23,6 +23,9 @@ export function useSecret(
       );
     }
     const info = resolveSecret(key, spec, env);
+    if (info.validationError) {
+      throw new SecretValidationError(key, spec, env, info.validationError);
+    }
     if (info.value !== undefined) return info.value;
     throw new SecretNotAvailableError(key, spec, env);
   }
@@ -40,8 +43,48 @@ export function useSecret(
   }
 
   const info = resolveSecret(key, registered, env, process.env, registered.registeredBy);
+  if (info.validationError) {
+    throw new SecretValidationError(key, registered, env, info.validationError, registered.registeredBy);
+  }
   if (info.value !== undefined) return info.value;
   throw new SecretNotAvailableError(key, registered, env, registered.registeredBy);
+}
+
+export class SecretValidationError extends Error {
+  readonly secretKey: string;
+  readonly envVar: string;
+  readonly environment: string;
+
+  constructor(key: string, spec: SecretSpec, env: string, validationError: string, registeredBy?: string) {
+    const override = spec.environments?.[env];
+    const envVar = override?.envVar ?? key;
+
+    const lines: string[] = [
+      `SecretValidationError: ${key} failed validation.`,
+      '',
+      `  Environment variable: ${envVar}`,
+      `  Validation error:     ${validationError}`,
+    ];
+
+    if (spec.description) {
+      lines.push(`  Description:          ${spec.description}`);
+    }
+    if (spec.example) {
+      lines.push(`  Example:              ${spec.example}`);
+    }
+    if (registeredBy) {
+      lines.push(`  Registered by:        ${registeredBy}`);
+    }
+    lines.push(`  Current environment:  ${env}`);
+    lines.push('');
+    lines.push(`  To fix: update the value of ${envVar} to pass validation.`);
+
+    super(lines.join('\n'));
+    this.name = 'SecretValidationError';
+    this.secretKey = key;
+    this.envVar = envVar;
+    this.environment = env;
+  }
 }
 
 export class SecretNotAvailableError extends Error {
@@ -50,8 +93,8 @@ export class SecretNotAvailableError extends Error {
   readonly environment: string;
 
   constructor(key: string, spec: SecretSpec, env: string, registeredBy?: string) {
-    const override = spec.envOverrides?.[env];
-    const envVar = override?.envVar ?? spec.envVar;
+    const override = spec.environments?.[env];
+    const envVar = override?.envVar ?? key;
 
     const lines: string[] = [
       `SecretNotAvailable: ${key} is not configured.`,
@@ -72,6 +115,9 @@ export class SecretNotAvailableError extends Error {
       }
     }
 
+    if (spec.example) {
+      lines.push(`  Example:              ${spec.example}`);
+    }
     if (registeredBy) {
       lines.push(`  Registered by:        ${registeredBy}`);
     }

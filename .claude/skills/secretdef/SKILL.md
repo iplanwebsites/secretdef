@@ -29,18 +29,16 @@ import { defineSecrets } from "secretdef";
 
 export const secrets = defineSecrets({
   STRIPE_SECRET_KEY: {
-    envVar: "STRIPE_SECRET_KEY",
     description:
       "Stripe API secret key. Starts with sk_live_ (not pk_). https://dashboard.stripe.com/apikeys",
-    envOverrides: {
+    environments: {
       development: { envVar: "STRIPE_TEST_SECRET_KEY" },
     },
   },
   DATABASE_URL: {
-    envVar: "DATABASE_URL",
     description:
       "Postgres connection string — format: postgresql://user:pass@host/db",
-    envOverrides: {
+    environments: {
       development: { default: "postgresql://localhost:5432/myapp_dev" },
     },
   },
@@ -51,12 +49,11 @@ export const secrets = defineSecrets({
 
 ```typescript
 type SecretSpec = {
-  envVar: string; // The environment variable name
   description?: string; // Human-readable — include a dashboard URL!
   required?: boolean; // Default: true
-  envOverrides?: {
+  environments?: {
     [env: string]: {
-      envVar?: string; // Different env var name per environment
+      envVar?: string; // Different env var name for this environment
       required?: boolean;
       default?: string;
     };
@@ -136,7 +133,7 @@ The error already tells you everything:
 1. Read the env var name from the error
 2. Read the description and dashboard URL
 3. Set the env var in `.env`, CI secrets, or your hosting dashboard
-4. If in development, check `envOverrides.development` for a different env var name or default
+4. If in development, check `environments.development` for a different env var name or default
 
 ## Project structure convention
 

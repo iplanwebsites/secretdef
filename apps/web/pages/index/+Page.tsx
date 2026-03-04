@@ -7,10 +7,11 @@ import { Logo } from '../../components/logo';
 import { ArrowRight, Github, Package, Shield, Cpu, Blocks, Copy, Check } from 'lucide-react';
 import type { Data } from './+data';
 
-const agentPrompt = `Scan this codebase for all process.env usage. For each secret found, use defineSecrets() from "secretdef" to declare it — right in the file where it's used. Include:
-- envVar: the environment variable name
+const agentPrompt = `Scan this codebase for all process.env usage. For each secret found, use defineSecrets() from "secretdef" to declare it — right in the file where it's used. The object key IS the env var name. Include:
 - description: what it is, expected format/prefix, a dashboard URL to provision it
-- envOverrides: if dev/staging use different keys or have defaults
+- validate: use a built-in validator (str, bool, num, email, host, port, url, json) or a custom function
+- devDefault: a safe default for local development if applicable
+- example: a sample value to show in error output (e.g. "sk_live_...")
 
 Use useSecret() to access values — it throws structured errors with the var name, description, and dashboard URL, so missing secrets are obvious to both humans and AI agents.
 
@@ -24,16 +25,15 @@ import { defineSecrets } from 'secretdef';
 
 export const secrets = defineSecrets({
   STRIPE_SECRET_KEY: {
-    envVar: 'STRIPE_SECRET_KEY',
-    description: 'Stripe API secret key. Starts with sk_live_ (not pk_). ' +
-      'https://dashboard.stripe.com/apikeys',
-    envOverrides: {
-      development: { envVar: 'STRIPE_TEST_SECRET_KEY' },
-    },
+    description: 'Stripe API secret key — https://dashboard.stripe.com/apikeys',
+    example: 'sk_live_...',
+    validate: 'str',
+    devDefault: 'sk_test_placeholder',
   },
   DATABASE_URL: {
-    envVar: 'DATABASE_URL',
     description: 'Postgres connection string — format: postgresql://user:pass@host/db',
+    validate: 'url',
+    devDefault: 'postgresql://localhost:5432/myapp_dev',
   },
 });`;
 

@@ -7,10 +7,10 @@ beforeEach(() => {
 });
 
 describe('SecretNotAvailableError', () => {
-  it('includes the env var name', () => {
+  it('includes the env var name (key)', () => {
     const err = new SecretNotAvailableError(
-      'DB',
-      { envVar: 'DATABASE_URL' },
+      'DATABASE_URL',
+      {},
       'production',
     );
     expect(err.message).toContain('DATABASE_URL');
@@ -19,18 +19,18 @@ describe('SecretNotAvailableError', () => {
 
   it('includes the secret key', () => {
     const err = new SecretNotAvailableError(
-      'DB',
-      { envVar: 'DATABASE_URL' },
+      'DATABASE_URL',
+      {},
       'production',
     );
-    expect(err.secretKey).toBe('DB');
-    expect(err.message).toContain('DB');
+    expect(err.secretKey).toBe('DATABASE_URL');
+    expect(err.message).toContain('DATABASE_URL');
   });
 
   it('includes the environment', () => {
     const err = new SecretNotAvailableError(
-      'DB',
-      { envVar: 'DATABASE_URL' },
+      'DATABASE_URL',
+      {},
       'staging',
     );
     expect(err.environment).toBe('staging');
@@ -39,9 +39,8 @@ describe('SecretNotAvailableError', () => {
 
   it('extracts URL from description into separate line', () => {
     const err = new SecretNotAvailableError(
-      'STRIPE',
+      'STRIPE_SECRET_KEY',
       {
-        envVar: 'STRIPE_SECRET_KEY',
         description: 'Stripe API key — https://dashboard.stripe.com/apikeys',
       },
       'production',
@@ -54,9 +53,8 @@ describe('SecretNotAvailableError', () => {
 
   it('handles description without URL', () => {
     const err = new SecretNotAvailableError(
-      'KEY',
+      'MY_KEY',
       {
-        envVar: 'MY_KEY',
         description: 'Internal API key for service auth',
       },
       'production',
@@ -67,8 +65,8 @@ describe('SecretNotAvailableError', () => {
 
   it('handles no description', () => {
     const err = new SecretNotAvailableError(
-      'KEY',
-      { envVar: 'MY_KEY' },
+      'MY_KEY',
+      {},
       'production',
     );
     expect(err.message).not.toContain('Description:');
@@ -77,8 +75,8 @@ describe('SecretNotAvailableError', () => {
 
   it('includes registeredBy when provided', () => {
     const err = new SecretNotAvailableError(
-      'KEY',
-      { envVar: 'MY_KEY' },
+      'MY_KEY',
+      {},
       'production',
       'src/secrets.ts',
     );
@@ -88,19 +86,18 @@ describe('SecretNotAvailableError', () => {
 
   it('omits registeredBy when not provided', () => {
     const err = new SecretNotAvailableError(
-      'KEY',
-      { envVar: 'MY_KEY' },
+      'MY_KEY',
+      {},
       'production',
     );
     expect(err.message).not.toContain('Registered by:');
   });
 
-  it('uses overridden env var name from envOverrides', () => {
+  it('uses overridden env var name from environments', () => {
     const err = new SecretNotAvailableError(
-      'STRIPE',
+      'STRIPE_SECRET_KEY',
       {
-        envVar: 'STRIPE_SECRET_KEY',
-        envOverrides: {
+        environments: {
           development: { envVar: 'STRIPE_TEST_SECRET_KEY' },
         },
       },
@@ -110,12 +107,11 @@ describe('SecretNotAvailableError', () => {
     expect(err.message).toContain('STRIPE_TEST_SECRET_KEY');
   });
 
-  it('uses base env var when envOverrides does not match', () => {
+  it('uses key as env var when environments does not match', () => {
     const err = new SecretNotAvailableError(
-      'STRIPE',
+      'STRIPE_SECRET_KEY',
       {
-        envVar: 'STRIPE_SECRET_KEY',
-        envOverrides: {
+        environments: {
           development: { envVar: 'STRIPE_TEST_SECRET_KEY' },
         },
       },
@@ -126,8 +122,8 @@ describe('SecretNotAvailableError', () => {
 
   it('includes fix instruction', () => {
     const err = new SecretNotAvailableError(
-      'KEY',
-      { envVar: 'MY_KEY' },
+      'MY_KEY',
+      {},
       'production',
     );
     expect(err.message).toContain('To fix:');
@@ -136,8 +132,8 @@ describe('SecretNotAvailableError', () => {
 
   it('has name set to SecretNotAvailableError', () => {
     const err = new SecretNotAvailableError(
-      'KEY',
-      { envVar: 'MY_KEY' },
+      'MY_KEY',
+      {},
       'production',
     );
     expect(err.name).toBe('SecretNotAvailableError');

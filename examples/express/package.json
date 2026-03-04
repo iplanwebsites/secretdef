@@ -1,0 +1,26 @@
+{
+  "name": "secretdef-example-express",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx server.ts",
+    "dev:ok": "API_KEY=sk-live-xxx DATABASE_URL=postgres://localhost/mydb tsx server.ts",
+    "dev:missing": "tsx server.ts",
+    "dev:production": "NODE_ENV=production tsx server.ts",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "secretdef": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.2",
+    "@types/node": "^22.0.0",
+    "@types/supertest": "^6.0.2",
+    "supertest": "^7.1.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}

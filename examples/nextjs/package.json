@@ -1,0 +1,25 @@
+{
+  "name": "secretdef-example-nextjs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3102",
+    "dev:ok": "API_KEY=sk-live-xxx DATABASE_URL=postgres://localhost/mydb next dev -p 3102",
+    "dev:missing": "next dev -p 3102",
+    "build": "next build",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "next": "^15.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "secretdef": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}

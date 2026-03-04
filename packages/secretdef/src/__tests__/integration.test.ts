@@ -15,10 +15,10 @@ beforeEach(() => {
 describe('Style A: explicit spread', () => {
   it('merges multiple packages and validates them all', () => {
     const stripe = defineSecrets({
-      STRIPE_KEY: { envVar: 'STRIPE_SECRET_KEY', description: 'Stripe API key' },
+      STRIPE_SECRET_KEY: { description: 'Stripe API key' },
     });
     const sendgrid = defineSecrets({
-      SENDGRID_KEY: { envVar: 'SENDGRID_API_KEY', description: 'SendGrid key' },
+      SENDGRID_API_KEY: { description: 'SendGrid key' },
     });
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -26,7 +26,7 @@ describe('Style A: explicit spread', () => {
 
     expect(warnSpy).toHaveBeenCalled();
     const output = warnSpy.mock.calls[0][0];
-    expect(output).toContain('Missing 2 secret(s)');
+    expect(output).toContain('2 secret problem(s)');
     expect(output).toContain('STRIPE_SECRET_KEY');
     expect(output).toContain('SENDGRID_API_KEY');
   });
@@ -35,10 +35,10 @@ describe('Style A: explicit spread', () => {
     const orig = process.env.TEST_SECRET_ABC;
     process.env.TEST_SECRET_ABC = 'my-value';
 
-    const specs = defineSecrets({ MY_SECRET: { envVar: 'TEST_SECRET_ABC' } });
+    const specs = defineSecrets({ TEST_SECRET_ABC: {} });
     const env = validateSecrets(specs, 'development');
 
-    expect(env.MY_SECRET).toBe('my-value');
+    expect(env.TEST_SECRET_ABC).toBe('my-value');
 
     if (orig === undefined) delete process.env.TEST_SECRET_ABC;
     else process.env.TEST_SECRET_ABC = orig;
@@ -48,8 +48,8 @@ describe('Style A: explicit spread', () => {
     const orig = process.env.EXPLICIT_VAR;
     process.env.EXPLICIT_VAR = 'explicit-val';
 
-    const specs = defineSecrets({ EX_KEY: { envVar: 'EXPLICIT_VAR' } });
-    expect(useSecret('EX_KEY', specs)).toBe('explicit-val');
+    const specs = defineSecrets({ EXPLICIT_VAR: {} });
+    expect(useSecret('EXPLICIT_VAR', specs)).toBe('explicit-val');
 
     if (orig === undefined) delete process.env.EXPLICIT_VAR;
     else process.env.EXPLICIT_VAR = orig;
@@ -61,25 +61,24 @@ describe('Style B: auto-register', () => {
     enableAutoRegister();
 
     // Simulate separate module imports
-    defineSecrets({ STRIPE_KEY: { envVar: 'STRIPE_SECRET_KEY' } });
-    defineSecrets({ SENDGRID_KEY: { envVar: 'SENDGRID_API_KEY' } });
+    defineSecrets({ STRIPE_SECRET_KEY: {} });
+    defineSecrets({ SENDGRID_API_KEY: {} });
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     validateSecrets(undefined, 'development');
 
     const output = warnSpy.mock.calls[0][0];
-    expect(output).toContain('Missing 2 secret(s)');
+    expect(output).toContain('2 secret problem(s)');
   });
 
-  it('uses envOverrides correctly during validation', () => {
+  it('uses environments override correctly during validation', () => {
     const orig = process.env.STRIPE_TEST_SECRET_KEY;
     process.env.STRIPE_TEST_SECRET_KEY = 'sk_test_123';
 
     enableAutoRegister();
     defineSecrets({
-      STRIPE_KEY: {
-        envVar: 'STRIPE_SECRET_KEY',
-        envOverrides: { development: { envVar: 'STRIPE_TEST_SECRET_KEY' } },
+      STRIPE_SECRET_KEY: {
+        environments: { development: { envVar: 'STRIPE_TEST_SECRET_KEY' } },
       },
     });
 
@@ -97,9 +96,9 @@ describe('Style B: auto-register', () => {
     process.env.AUTO_VAR = 'auto-val';
 
     enableAutoRegister();
-    defineSecrets({ AUTO_KEY: { envVar: 'AUTO_VAR' } });
+    defineSecrets({ AUTO_VAR: {} });
 
-    expect(useSecret('AUTO_KEY')).toBe('auto-val');
+    expect(useSecret('AUTO_VAR')).toBe('auto-val');
 
     if (orig === undefined) delete process.env.AUTO_VAR;
     else process.env.AUTO_VAR = orig;
@@ -109,18 +108,18 @@ describe('Style B: auto-register', () => {
 describe('SDK author pattern', () => {
   it('defineSecrets returns the same specs regardless of auto-register', () => {
     const specsNoAuto = defineSecrets({
-      KEY: { envVar: 'VAR', description: 'test' },
+      MY_VAR: { description: 'test' },
     });
 
     clearRegistry();
     enableAutoRegister();
 
     const specsWithAuto = defineSecrets({
-      KEY2: { envVar: 'VAR', description: 'test' },
+      MY_VAR_2: { description: 'test' },
     });
 
     // Both return pure data
-    expect(specsNoAuto).toEqual({ KEY: { envVar: 'VAR', description: 'test' } });
-    expect(specsWithAuto).toEqual({ KEY2: { envVar: 'VAR', description: 'test' } });
+    expect(specsNoAuto).toEqual({ MY_VAR: { description: 'test' } });
+    expect(specsWithAuto).toEqual({ MY_VAR_2: { description: 'test' } });
   });
 });

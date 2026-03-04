@@ -10,8 +10,13 @@ secretdef is a zero-dependency TypeScript library for declaring which environmen
 ## Core API
 
 ```typescript
-import { defineSecrets, validateSecrets, useSecret, enableAutoRegister } from 'secretdef';
-import type { SecretSpec } from 'secretdef';
+import {
+  defineSecrets,
+  validateSecrets,
+  useSecret,
+  enableAutoRegister,
+} from "secretdef";
+import type { SecretSpec } from "secretdef";
 ```
 
 ### defineSecrets(specs)
@@ -19,21 +24,21 @@ import type { SecretSpec } from 'secretdef';
 Declares secret requirements. Returns the same `Record<string, SecretSpec>` passed in. Pure data — no side effects unless `enableAutoRegister()` was called first.
 
 ```typescript
-import { defineSecrets } from 'secretdef';
+import { defineSecrets } from "secretdef";
 
 export const secrets = defineSecrets({
   STRIPE_SECRET_KEY: {
-    envVar: 'STRIPE_SECRET_KEY',
-    description: 'Stripe API secret key. Starts with sk_live_ (not pk_). https://dashboard.stripe.com/apikeys',
-    envOverrides: {
-      development: { envVar: 'STRIPE_TEST_SECRET_KEY' },
+    description:
+      "Stripe API secret key. Starts with sk_live_ (not pk_). https://dashboard.stripe.com/apikeys",
+    environments: {
+      development: { envVar: "STRIPE_TEST_SECRET_KEY" },
     },
   },
   DATABASE_URL: {
-    envVar: 'DATABASE_URL',
-    description: 'Postgres connection string — format: postgresql://user:pass@host/db',
-    envOverrides: {
-      development: { default: 'postgresql://localhost:5432/myapp_dev' },
+    description:
+      "Postgres connection string — format: postgresql://user:pass@host/db",
+    environments: {
+      development: { default: "postgresql://localhost:5432/myapp_dev" },
     },
   },
 });
@@ -43,12 +48,11 @@ export const secrets = defineSecrets({
 
 ```typescript
 type SecretSpec = {
-  envVar: string;              // The environment variable name
-  description?: string;        // Human-readable — include a dashboard URL!
-  required?: boolean;          // Default: true
-  envOverrides?: {
+  description?: string; // Human-readable — include a dashboard URL!
+  required?: boolean; // Default: true
+  environments?: {
     [env: string]: {
-      envVar?: string;         // Different env var name per environment
+      envVar?: string; // Different env var name for this environment
       required?: boolean;
       default?: string;
     };
@@ -66,23 +70,26 @@ Validates secrets against the environment. Returns `Record<string, string>` of r
 Two styles:
 
 **Auto-register (easy):**
+
 ```typescript
-import { enableAutoRegister, validateSecrets } from 'secretdef';
+import { enableAutoRegister, validateSecrets } from "secretdef";
 enableAutoRegister();
-import './secrets';
+import "./secrets";
 const env = validateSecrets();
 ```
 
 **Explicit spreading (no global state):**
+
 ```typescript
-import { validateSecrets } from 'secretdef';
-import { secrets as app } from './secrets';
+import { validateSecrets } from "secretdef";
+import { secrets as app } from "./secrets";
 export const env = validateSecrets({ ...app });
 ```
 
 ### useSecret(key, specs?)
 
 Returns the secret value or throws `SecretNotAvailableError` with structured context:
+
 - Env var name
 - Description (with URL extracted separately)
 - Registering file path
@@ -90,21 +97,21 @@ Returns the secret value or throws `SecretNotAvailableError` with structured con
 - Fix instructions
 
 ```typescript
-import { useSecret } from 'secretdef';
-const key = useSecret('STRIPE_SECRET_KEY');
+import { useSecret } from "secretdef";
+const key = useSecret("STRIPE_SECRET_KEY");
 ```
 
 ### enableAutoRegister()
 
 Call once at app entry, before imports. Every subsequent `defineSecrets()` call pushes specs to a global registry. Then `validateSecrets()` with no arguments checks them all.
 
-## Published definitions (@secretdef/*)
+## Published definitions (@secretdef/\*)
 
 Pre-built definitions for popular services ship as `@secretdef/<service>` packages:
 
 ```typescript
-import { secrets as stripe } from '@secretdef/stripe';
-import { secrets as resend } from '@secretdef/resend';
+import { secrets as stripe } from "@secretdef/stripe";
+import { secrets as resend } from "@secretdef/resend";
 ```
 
 Available: stripe, paypal, auth0, clerk, supabase, firebase, sendgrid, resend, postmark, openai, anthropic, aws, gcp, planetscale, neon, turso, twilio, segment, mixpanel.
@@ -112,15 +119,17 @@ Available: stripe, paypal, auth0, clerk, supabase, firebase, sendgrid, resend, p
 ## Writing good descriptions
 
 Always include in the `description` field:
+
 1. **What the key is** — e.g. "Stripe API secret key"
-2. **Format hint** — e.g. "Starts with sk_live_ (not pk_)"
+2. **Format hint** — e.g. "Starts with sk*live* (not pk\_)"
 3. **Where to get it** — dashboard URL
 4. **Who can provision it** — e.g. "requires Admin role"
 
 ## When fixing SecretNotAvailableError
 
 The error already tells you everything:
+
 1. Read the env var name from the error
 2. Read the description and dashboard URL
 3. Set the env var in `.env`, CI secrets, or your hosting dashboard
-4. If in development, check `envOverrides.development` for a different env var name or default
+4. If in development, check `environments.development` for a different env var name or default

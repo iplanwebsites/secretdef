@@ -37,68 +37,113 @@ export function validateSecrets(
   }
 
   const missing: ResolvedInfo[] = [];
+  const invalid: ResolvedInfo[] = [];
   const resolved: ValidatedSecrets = {};
 
   for (const { key, spec, registeredBy } of entries) {
     const info = resolveSecret(key, spec, currentEnv, process.env, registeredBy);
     if (info.missing) {
       missing.push(info);
+    } else if (info.validationError) {
+      invalid.push(info);
     } else if (info.value !== undefined) {
       resolved[key] = info.value;
     }
   }
 
-  if (missing.length === 0) return resolved;
+  const problems = [...missing, ...invalid];
+  if (problems.length === 0) return resolved;
 
   if (mode === 'error') {
-    printErrorTable(missing, currentEnv);
+    printErrorTable(missing, invalid, currentEnv);
     process.exit(1);
   } else {
-    printWarningTable(missing, currentEnv);
+    printWarningTable(missing, invalid, currentEnv);
   }
 
   return resolved;
 }
 
-function printErrorTable(missing: ResolvedInfo[], env: string): void {
+function formatProblem(info: ResolvedInfo, marker: string, reason: string): string[] {
   const lines: string[] = [];
+  lines.push(`  ${marker} ${info.envVar} — ${reason}`);
+  if (info.spec.description) {
+    lines.push(`    ${info.spec.description}`);
+  }
+  if (info.spec.example) {
+    lines.push(`    example: ${info.spec.example}`);
+  }
+  if (info.registeredBy) {
+    lines.push(`    registered by: ${info.registeredBy}`);
+  }
   lines.push('');
-  lines.push(`\u{1F534} Missing ${missing.length} secret(s) [env=${env}]:`);
-  lines.push('');
+  return lines;
+}
 
-  for (const info of missing) {
-    lines.push(`  \u2717 ${info.envVar}`);
-    if (info.spec.description) {
-      lines.push(`    ${info.spec.description}`);
+function formatProblems(missing: ResolvedInfo[], invalid: ResolvedInfo[], marker: string): string[] {
+  const all = [
+    ...missing.map((info) => ({ info, reason: 'missing' })),
+    ...invalid.map((info) => ({ info, reason: `invalid: ${info.validationError}` })),
+  ];
+
+  // Group by spec.group if any entries have one
+  const hasGroups = all.some(({ info }) => info.spec.group);
+  if (!hasGroups) {
+    const lines: string[] = [];
+    for (const { info, reason } of all) {
+      lines.push(...formatProblem(info, marker, reason));
     }
-    if (info.registeredBy) {
-      lines.push(`    registered by: ${info.registeredBy}`);
-    }
-    lines.push('');
+    return lines;
   }
 
+  // Collect by group (ungrouped last)
+  const groups = new Map<string, typeof all>();
+  const ungrouped: typeof all = [];
+  for (const entry of all) {
+    const group = entry.info.spec.group;
+    if (group) {
+      if (!groups.has(group)) groups.set(group, []);
+      groups.get(group)!.push(entry);
+    } else {
+      ungrouped.push(entry);
+    }
+  }
+
+  const lines: string[] = [];
+  for (const [group, entries] of groups) {
+    lines.push(`  [${group}]`);
+    for (const { info, reason } of entries) {
+      lines.push(...formatProblem(info, marker, reason));
+    }
+  }
+  if (ungrouped.length > 0) {
+    if (groups.size > 0) lines.push('  [other]');
+    for (const { info, reason } of ungrouped) {
+      lines.push(...formatProblem(info, marker, reason));
+    }
+  }
+
+  return lines;
+}
+
+function printErrorTable(missing: ResolvedInfo[], invalid: ResolvedInfo[], env: string): void {
+  const total = missing.length + invalid.length;
+  const lines: string[] = [];
+  lines.push('');
+  lines.push(`\u{1F534} ${total} secret problem(s) [env=${env}]:`);
+  lines.push('');
+  lines.push(...formatProblems(missing, invalid, '\u2717'));
   console.error(lines.join('\n'));
 }
 
-function printWarningTable(missing: ResolvedInfo[], env: string): void {
+function printWarningTable(missing: ResolvedInfo[], invalid: ResolvedInfo[], env: string): void {
+  const total = missing.length + invalid.length;
   const lines: string[] = [];
   lines.push('');
-  lines.push(`\u26A0\uFE0F  Missing ${missing.length} secret(s) [env=${env}]:`);
+  lines.push(`\u26A0\uFE0F  ${total} secret problem(s) [env=${env}]:`);
   lines.push('');
-
-  for (const info of missing) {
-    lines.push(`  \u26A0 ${info.envVar}`);
-    if (info.spec.description) {
-      lines.push(`    ${info.spec.description}`);
-    }
-    if (info.registeredBy) {
-      lines.push(`    registered by: ${info.registeredBy}`);
-    }
-    lines.push('');
-  }
-
+  lines.push(...formatProblems(missing, invalid, '\u26A0'));
   lines.push('Server will start. These will throw if accessed at runtime.');
   lines.push('');
-
   console.warn(lines.join('\n'));
 }

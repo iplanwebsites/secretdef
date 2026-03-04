@@ -18,9 +18,8 @@ function assertValidSecrets(
   expect(Object.keys(secrets).length).toBeGreaterThan(0);
 
   for (const [key, spec] of Object.entries(secrets)) {
-    // Every spec must have envVar
-    expect(spec.envVar, `${name}.${key} must have envVar`).toBeTruthy();
-    expect(typeof spec.envVar, `${name}.${key}.envVar must be string`).toBe('string');
+    // Key should be a valid env var name (UPPERCASE_SNAKE_CASE)
+    expect(key, `${name}.${key} should be UPPER_SNAKE_CASE`).toMatch(/^[A-Z][A-Z0-9_]*$/);
 
     // description should be present
     expect(spec.description, `${name}.${key} should have description`).toBeTruthy();
@@ -31,20 +30,20 @@ function assertValidSecrets(
       `${name}.${key}.description should contain a URL`,
     ).toMatch(/https?:\/\//);
 
-    // If envOverrides exists, it should be an object
-    if (spec.envOverrides) {
-      expect(typeof spec.envOverrides).toBe('object');
-      for (const [env, override] of Object.entries(spec.envOverrides)) {
+    // If environments exists, it should be an object
+    if (spec.environments) {
+      expect(typeof spec.environments).toBe('object');
+      for (const [env, override] of Object.entries(spec.environments)) {
         if (override) {
           // Override fields should be valid types
           if (override.envVar !== undefined) {
-            expect(typeof override.envVar, `${name}.${key}.envOverrides.${env}.envVar`).toBe('string');
+            expect(typeof override.envVar, `${name}.${key}.environments.${env}.envVar`).toBe('string');
           }
           if (override.required !== undefined) {
-            expect(typeof override.required, `${name}.${key}.envOverrides.${env}.required`).toBe('boolean');
+            expect(typeof override.required, `${name}.${key}.environments.${env}.required`).toBe('boolean');
           }
           if (override.default !== undefined) {
-            expect(typeof override.default, `${name}.${key}.envOverrides.${env}.default`).toBe('string');
+            expect(typeof override.default, `${name}.${key}.environments.${env}.default`).toBe('string');
           }
         }
       }

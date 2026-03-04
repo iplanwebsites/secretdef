@@ -38,8 +38,13 @@ pnpm --filter secretdef-web build   # Production build
 Four exports + one opt-in:
 
 ```ts
-import { defineSecrets, validateSecrets, useSecret, enableAutoRegister } from 'secretdef';
-import type { SecretSpec } from 'secretdef';
+import {
+  defineSecrets,
+  validateSecrets,
+  useSecret,
+  enableAutoRegister,
+} from "secretdef";
+import type { SecretSpec } from "secretdef";
 ```
 
 - `defineSecrets(specs)` — Returns pure `Record<string, SecretSpec>`. If `enableAutoRegister()` was called, also pushes to global registry.
@@ -59,12 +64,12 @@ The primary use case is **app developers** defining their own secrets in `secret
 - `src/types.ts` — `SecretSpec`, `RegisteredSecret`, `ValidateOptions`
 - `src/registry.ts` — Global `Map`, `enableAutoRegister()`, `register()`, `clearRegistry()`
 - `src/caller.ts` — Stack trace parsing to extract caller file path
-- `src/resolve.ts` — Resolves a spec against env + envOverrides
+- `src/resolve.ts` — Resolves a spec against env + environments
 - `src/validate.ts` — `validateSecrets()` with error/warn output
 - `src/accessor.ts` — `useSecret()` + `SecretNotAvailableError`
 - `src/index.ts` — Public API barrel
 
-## @secretdef/* packages
+## @secretdef/\* packages
 
 Each package is a single `index.ts` exporting `const secrets = defineSecrets({...})` with a `package.json` that peer-depends on `secretdef`. Uses `workspace:*` protocol locally.
 

@@ -13,8 +13,8 @@ describe('useSecret with explicit map', () => {
     const orig = process.env.MY_ENV_VAR;
     process.env.MY_ENV_VAR = 'hello';
 
-    const specs = defineSecrets({ MY_KEY: { envVar: 'MY_ENV_VAR' } });
-    const value = useSecret('MY_KEY', specs);
+    const specs = defineSecrets({ MY_ENV_VAR: {} });
+    const value = useSecret('MY_ENV_VAR', specs);
     expect(value).toBe('hello');
 
     if (orig === undefined) delete process.env.MY_ENV_VAR;
@@ -22,22 +22,22 @@ describe('useSecret with explicit map', () => {
   });
 
   it('throws for unknown key in explicit map', () => {
-    const specs = defineSecrets({ MY_KEY: { envVar: 'MY_ENV_VAR' } });
+    const specs = defineSecrets({ MY_ENV_VAR: {} });
     expect(() => useSecret('UNKNOWN', specs)).toThrowError(/Unknown secret key/);
   });
 
   it('throws SecretNotAvailableError for missing secret in explicit map', () => {
     const specs = defineSecrets({
-      MISSING: { envVar: 'NONEXISTENT_VAR_99999', description: 'Test — https://example.com/keys' },
+      NONEXISTENT_VAR_99999: { description: 'Test — https://example.com/keys' },
     });
 
     try {
-      useSecret('MISSING', specs);
+      useSecret('NONEXISTENT_VAR_99999', specs);
       expect.unreachable('should have thrown');
     } catch (err) {
       expect(err).toBeInstanceOf(SecretNotAvailableError);
       const e = err as SecretNotAvailableError;
-      expect(e.secretKey).toBe('MISSING');
+      expect(e.secretKey).toBe('NONEXISTENT_VAR_99999');
       expect(e.envVar).toBe('NONEXISTENT_VAR_99999');
       expect(e.message).toContain('https://example.com/keys');
     }
@@ -50,9 +50,9 @@ describe('useSecret with auto-registry', () => {
     process.env.REG_VAR = 'from-registry';
 
     enableAutoRegister();
-    defineSecrets({ REG_KEY: { envVar: 'REG_VAR' } });
+    defineSecrets({ REG_VAR: {} });
 
-    const value = useSecret('REG_KEY');
+    const value = useSecret('REG_VAR');
     expect(value).toBe('from-registry');
 
     if (orig === undefined) delete process.env.REG_VAR;
@@ -67,9 +67,9 @@ describe('useSecret with auto-registry', () => {
   it('throws SecretNotAvailableError for missing registered secret', () => {
     enableAutoRegister();
     defineSecrets({
-      MISSING: { envVar: 'NONEXISTENT_VAR_99999', description: 'Test' },
+      NONEXISTENT_VAR_99999: { description: 'Test' },
     });
 
-    expect(() => useSecret('MISSING')).toThrow(SecretNotAvailableError);
+    expect(() => useSecret('NONEXISTENT_VAR_99999')).toThrow(SecretNotAvailableError);
   });
 });

@@ -10,7 +10,7 @@ beforeEach(() => {
 describe('validateSecrets output format', () => {
   it('error table includes description', () => {
     const specs = defineSecrets({
-      KEY: { envVar: 'NONEXISTENT_XYZ', description: 'A test API key' },
+      NONEXISTENT_XYZ: { description: 'A test API key' },
     });
 
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -25,7 +25,7 @@ describe('validateSecrets output format', () => {
   it('error table includes registeredBy from auto-registry', () => {
     enableAutoRegister();
     defineSecrets({
-      KEY: { envVar: 'NONEXISTENT_XYZ' },
+      NONEXISTENT_XYZ: {},
     });
 
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -39,7 +39,7 @@ describe('validateSecrets output format', () => {
 
   it('warning table includes "Server will start" message', () => {
     const specs = defineSecrets({
-      KEY: { envVar: 'NONEXISTENT_XYZ' },
+      NONEXISTENT_XYZ: {},
     });
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -52,7 +52,7 @@ describe('validateSecrets output format', () => {
 
   it('error table uses red circle emoji', () => {
     const specs = defineSecrets({
-      KEY: { envVar: 'NONEXISTENT_XYZ' },
+      NONEXISTENT_XYZ: {},
     });
 
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -66,7 +66,7 @@ describe('validateSecrets output format', () => {
 
   it('warning table uses warning emoji', () => {
     const specs = defineSecrets({
-      KEY: { envVar: 'NONEXISTENT_XYZ' },
+      NONEXISTENT_XYZ: {},
     });
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -78,7 +78,7 @@ describe('validateSecrets output format', () => {
 
   it('shows correct env in output', () => {
     const specs = defineSecrets({
-      KEY: { envVar: 'NONEXISTENT_XYZ' },
+      NONEXISTENT_XYZ: {},
     });
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -100,7 +100,7 @@ describe('validateSecrets output format', () => {
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const specs = defineSecrets({ KEY: { envVar: 'VALID_KEY_TEST' } });
+    const specs = defineSecrets({ VALID_KEY_TEST: {} });
     validateSecrets(specs, 'production');
 
     expect(warnSpy).not.toHaveBeenCalled();
@@ -112,7 +112,7 @@ describe('validateSecrets output format', () => {
 
   it('does not include optional missing secrets in missing count', () => {
     const specs = defineSecrets({
-      OPT: { envVar: 'NONEXISTENT_OPT', required: false },
+      NONEXISTENT_OPT: { required: false },
     });
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -123,35 +123,33 @@ describe('validateSecrets output format', () => {
     expect(result).toEqual({});
   });
 
-  it('resolves envOverrides default values', () => {
+  it('resolves environments default values', () => {
     const specs = defineSecrets({
-      DB: {
-        envVar: 'DATABASE_URL',
-        envOverrides: {
+      DATABASE_URL: {
+        environments: {
           development: { default: 'postgresql://localhost/dev' },
         },
       },
     });
 
     const result = validateSecrets(specs, 'development');
-    expect(result.DB).toBe('postgresql://localhost/dev');
+    expect(result.DATABASE_URL).toBe('postgresql://localhost/dev');
   });
 
-  it('env var value takes precedence over envOverrides default', () => {
+  it('env var value takes precedence over environments default', () => {
     const orig = process.env.DATABASE_URL;
     process.env.DATABASE_URL = 'postgresql://prod-host/db';
 
     const specs = defineSecrets({
-      DB: {
-        envVar: 'DATABASE_URL',
-        envOverrides: {
+      DATABASE_URL: {
+        environments: {
           development: { default: 'postgresql://localhost/dev' },
         },
       },
     });
 
     const result = validateSecrets(specs, 'production');
-    expect(result.DB).toBe('postgresql://prod-host/db');
+    expect(result.DATABASE_URL).toBe('postgresql://prod-host/db');
 
     if (orig === undefined) delete process.env.DATABASE_URL;
     else process.env.DATABASE_URL = orig;

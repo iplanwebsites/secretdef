@@ -12,10 +12,10 @@ describe('validateSecrets with explicit map', () => {
     const orig = process.env.TEST_KEY;
     process.env.TEST_KEY = 'value';
 
-    const specs = defineSecrets({ KEY: { envVar: 'TEST_KEY' } });
+    const specs = defineSecrets({ TEST_KEY: {} });
     const result = validateSecrets(specs, 'development');
 
-    expect(result.KEY).toBe('value');
+    expect(result.TEST_KEY).toBe('value');
 
     if (orig === undefined) delete process.env.TEST_KEY;
     else process.env.TEST_KEY = orig;
@@ -23,7 +23,7 @@ describe('validateSecrets with explicit map', () => {
 
   it('warns in development for missing secrets', () => {
     const specs = defineSecrets({
-      MISSING: { envVar: 'NONEXISTENT_VAR_12345', description: 'A test secret' },
+      NONEXISTENT_VAR_12345: { description: 'A test secret' },
     });
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -31,12 +31,12 @@ describe('validateSecrets with explicit map', () => {
 
     expect(warnSpy).toHaveBeenCalled();
     const output = warnSpy.mock.calls[0][0];
-    expect(output).toContain('Missing 1 secret(s)');
+    expect(output).toContain('1 secret problem(s)');
     expect(output).toContain('NONEXISTENT_VAR_12345');
   });
 
   it('exits in production for missing secrets', () => {
-    const specs = defineSecrets({ MISSING: { envVar: 'NONEXISTENT_VAR_12345' } });
+    const specs = defineSecrets({ NONEXISTENT_VAR_12345: {} });
 
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -46,7 +46,7 @@ describe('validateSecrets with explicit map', () => {
   });
 
   it('respects mode override to force error in dev', () => {
-    const specs = defineSecrets({ MISSING: { envVar: 'NONEXISTENT_VAR_12345' } });
+    const specs = defineSecrets({ NONEXISTENT_VAR_12345: {} });
 
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -56,7 +56,7 @@ describe('validateSecrets with explicit map', () => {
   });
 
   it('respects mode override to force warn in production', () => {
-    const specs = defineSecrets({ MISSING: { envVar: 'NONEXISTENT_VAR_12345' } });
+    const specs = defineSecrets({ NONEXISTENT_VAR_12345: {} });
 
     const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -70,7 +70,7 @@ describe('validateSecrets with explicit map', () => {
 describe('validateSecrets with auto-registry', () => {
   it('validates from auto-registry when no map is passed', () => {
     enableAutoRegister();
-    defineSecrets({ MISSING: { envVar: 'NONEXISTENT_VAR_12345' } });
+    defineSecrets({ NONEXISTENT_VAR_12345: {} });
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     validateSecrets(undefined, 'development');
@@ -85,10 +85,10 @@ describe('validateSecrets with auto-registry', () => {
     process.env.AUTO_KEY = 'auto-value';
 
     enableAutoRegister();
-    defineSecrets({ MY_KEY: { envVar: 'AUTO_KEY' } });
+    defineSecrets({ AUTO_KEY: {} });
 
     const result = validateSecrets(undefined, 'development');
-    expect(result.MY_KEY).toBe('auto-value');
+    expect(result.AUTO_KEY).toBe('auto-value');
 
     if (orig === undefined) delete process.env.AUTO_KEY;
     else process.env.AUTO_KEY = orig;
@@ -98,17 +98,17 @@ describe('validateSecrets with auto-registry', () => {
 describe('validateSecrets with spread pattern', () => {
   it('merges multiple defineSecrets results', () => {
     const stripe = defineSecrets({
-      STRIPE_KEY: { envVar: 'NONEXISTENT_STRIPE' },
+      NONEXISTENT_STRIPE: {},
     });
     const sendgrid = defineSecrets({
-      SENDGRID_KEY: { envVar: 'NONEXISTENT_SENDGRID' },
+      NONEXISTENT_SENDGRID: {},
     });
 
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     validateSecrets({ ...stripe, ...sendgrid }, 'development');
 
     const output = warnSpy.mock.calls[0][0];
-    expect(output).toContain('Missing 2 secret(s)');
+    expect(output).toContain('2 secret problem(s)');
     expect(output).toContain('NONEXISTENT_STRIPE');
     expect(output).toContain('NONEXISTENT_SENDGRID');
   });

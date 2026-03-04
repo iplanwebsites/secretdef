@@ -11,18 +11,19 @@ import { defineSecrets } from 'secretdef';
 
 export const secrets = defineSecrets({
   DATABASE_URL: {
-    envVar: 'DATABASE_URL',
     description: 'Postgres connection string — check your hosting dashboard',
+    validate: 'url',
+    devDefault: 'postgresql://localhost:5432/myapp_dev',
   },
   STRIPE_SECRET_KEY: {
-    envVar: 'STRIPE_SECRET_KEY',
     description: 'Stripe API secret key — https://dashboard.stripe.com/apikeys',
-    envOverrides: {
-      development: { envVar: 'STRIPE_TEST_SECRET_KEY' },
+    example: 'sk_live_...',
+    validate: 'str',
+    environments: {
+      development: { default: 'sk_test_placeholder' },
     },
   },
   ANALYTICS_KEY: {
-    envVar: 'ANALYTICS_KEY',
     description: 'Analytics write key',
     required: false,
   },
@@ -63,34 +64,77 @@ import { secrets } from './secrets';
 // Pass an explicit map — no global registry needed
 const key = useSecret('STRIPE_SECRET_KEY', secrets);`;
 
-const secretSpecCode = `type SecretSpec = {
-  envVar: string;              // The environment variable name
+const secretSpecCode = `// The object key IS the env var name
+type SecretSpec = {
   description?: string;        // Human-readable — include a dashboard URL!
   required?: boolean;          // Default: true
-  default?: string;            // Fallback value if env var is not set
-  envOverrides?: {             // Per-environment overrides
+  validate?: SecretValidation; // Built-in name or custom function
+  choices?: string[];          // Allowlist of valid values
+  example?: string;            // Example value shown in errors
+  devDefault?: string;         // Default for non-production environments
+  group?: string;              // Group label in validation output
+  environments?: {             // Per-environment overrides
     [env: string]: {
       envVar?: string;         // Different env var name for this environment
       required?: boolean;      // Override required flag
       default?: string;        // Override default value
     };
   };
-};`;
+};
 
-const envOverridesCode = `export const secrets = defineSecrets({
-  STRIPE_SECRET_KEY: {
-    envVar: 'STRIPE_SECRET_KEY',
-    description: 'Stripe API secret key — https://dashboard.stripe.com/apikeys',
-    envOverrides: {
-      development: {
-        envVar: 'STRIPE_TEST_SECRET_KEY', // use test key in dev
-      },
+// String shorthand also works:
+defineSecrets({ MY_KEY: 'description text' });
+// → equivalent to { MY_KEY: { description: 'description text' } }`;
+
+const validationCode = `import { defineSecrets } from 'secretdef';
+
+export const secrets = defineSecrets({
+  PORT: {
+    description: 'Server port',
+    validate: 'port',          // built-in: port (0-65535)
+    devDefault: '3000',
+  },
+  ADMIN_EMAIL: {
+    description: 'Admin notification address',
+    validate: 'email',         // built-in: email
+  },
+  LOG_LEVEL: {
+    description: 'Logging verbosity',
+    choices: ['debug', 'info', 'warn', 'error'],
+    devDefault: 'debug',
+  },
+  SERVICE_CONFIG: {
+    description: 'JSON config blob from dashboard',
+    validate: 'json',          // built-in: parses JSON
+  },
+  CUSTOM_TOKEN: {
+    description: 'Must start with tok_',
+    validate: (v) => {         // custom function
+      if (!v.startsWith('tok_')) throw new Error('Must start with tok_');
+      return v;
     },
   },
-  WEBHOOK_SECRET: {
-    envVar: 'STRIPE_WEBHOOK_SECRET',
+});`;
+
+const builtinValidatorsCode = `// Built-in validators:
+// str    — non-empty string
+// bool   — true/false/t/f/1/0/yes/no/on/off
+// num    — any number
+// email  — basic email format
+// host   — domain name or IP address
+// port   — integer 0-65535
+// url    — valid URL (via new URL())
+// json   — valid JSON (via JSON.parse())`;
+
+const environmentsCode = `export const secrets = defineSecrets({
+  STRIPE_SECRET_KEY: {
+    description: 'Stripe API secret key — https://dashboard.stripe.com/apikeys',
+    example: 'sk_live_...',
+    devDefault: 'sk_test_placeholder',   // shorthand for environments.development.default
+  },
+  STRIPE_WEBHOOK_SECRET: {
     description: 'Webhook signing secret',
-    envOverrides: {
+    environments: {
       development: {
         required: false,        // optional in dev
         default: 'whsec_test',  // fallback value
@@ -104,14 +148,11 @@ import { defineSecrets } from 'secretdef';
 
 export const secrets = defineSecrets({
   DATABASE_URL: {
-    envVar: 'DATABASE_URL',
     description: 'Postgres connection string',
   },
   DATABASE_POOL_SIZE: {
-    envVar: 'DATABASE_POOL_SIZE',
     description: 'Connection pool size',
     required: false,
-    default: '10',
   },
 });`;
 
@@ -165,7 +206,9 @@ export default function Page() {
           <li><a href="#define" className="hover:text-foreground transition-colors">Define your secrets</a></li>
           <li><a href="#validate" className="hover:text-foreground transition-colors">Validate at startup</a></li>
           <li><a href="#use-secret" className="hover:text-foreground transition-colors">Read secrets with useSecret()</a></li>
-          <li><a href="#env-overrides" className="hover:text-foreground transition-colors">Environment overrides</a></li>
+          <li><a href="#validation" className="hover:text-foreground transition-colors">Validation</a></li>
+          <li><a href="#env-overrides" className="hover:text-foreground transition-colors">Environment overrides &amp; dev defaults</a></li>
+          <li><a href="#examples" className="hover:text-foreground transition-colors">Framework examples</a></li>
           <li><a href="#api" className="hover:text-foreground transition-colors">API reference</a></li>
           <li><a href="#best-practices" className="hover:text-foreground transition-colors">Best practices</a></li>
           <li><a href="#claude-md" className="hover:text-foreground transition-colors">CLAUDE.md integration</a></li>
@@ -303,17 +346,81 @@ export default function Page() {
         </div>
       </section>
 
-      {/* envOverrides */}
-      <section id="env-overrides" className="mt-12">
-        <h2 className="text-2xl font-bold text-foreground">Environment overrides</h2>
+      {/* Validation */}
+      <section id="validation" className="mt-12">
+        <h2 className="text-2xl font-bold text-foreground">Validation</h2>
         <p className="mt-3 text-muted-foreground">
-          Use <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">envOverrides</code> to
-          change the env var name, required flag, or default value per environment.
+          Add <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">validate</code> to
+          check that a secret's value has the right format. Use a built-in validator name or pass a custom function.
+          Add <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">choices</code> to
+          restrict to an allowlist.
+        </p>
+        <div className="mt-4">
+          <CodeBlock code={validationCode} language="typescript" filename="src/secrets.ts" />
+        </div>
+        <div className="mt-4">
+          <CodeBlock code={builtinValidatorsCode} language="typescript" filename="Built-in validators" />
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Validation runs during <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">validateSecrets()</code> and <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">useSecret()</code>.
+          Invalid values appear in the same error/warning table as missing secrets.
+        </p>
+      </section>
+
+      {/* environments */}
+      <section id="env-overrides" className="mt-12">
+        <h2 className="text-2xl font-bold text-foreground">Environment overrides &amp; dev defaults</h2>
+        <p className="mt-3 text-muted-foreground">
+          Use <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">devDefault</code> for
+          a quick default outside production, or <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">environments</code> for
+          fine-grained control per environment (different required flag, default value, or env var name).
           The environment is read from <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">NODE_ENV</code>.
         </p>
         <div className="mt-4">
-          <CodeBlock code={envOverridesCode} language="typescript" filename="src/secrets.ts" />
+          <CodeBlock code={environmentsCode} language="typescript" filename="src/secrets.ts" />
         </div>
+      </section>
+
+      {/* Framework examples */}
+      <section id="examples" className="mt-12">
+        <h2 className="text-2xl font-bold text-foreground">Framework examples</h2>
+        <p className="mt-3 text-muted-foreground">
+          The repo includes complete working examples for Express, Hono, and Next.js in
+          the <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">examples/</code> directory.
+          Each one shows the same pattern:
+        </p>
+        <ul className="mt-4 text-sm text-muted-foreground space-y-1">
+          <li><strong className="text-foreground">secrets.ts</strong> — declares secrets with <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">defineSecrets</code></li>
+          <li><strong className="text-foreground">server.ts</strong> — calls <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">validateSecrets</code> at startup, <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">useSecret</code> at point of use</li>
+          <li><strong className="text-foreground">tests</strong> — covers clean start, missing warnings, production errors, dev defaults, and runtime throws</li>
+        </ul>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 pr-4 font-semibold text-foreground">Framework</th>
+                <th className="text-left py-2 pr-4 font-semibold text-foreground">Run</th>
+              </tr>
+            </thead>
+            <tbody className="text-muted-foreground font-mono text-xs">
+              <tr className="border-b border-border/50">
+                <td className="py-2 pr-4">Express</td>
+                <td className="py-2"><code>pnpm --filter secretdef-example-express dev</code></td>
+              </tr>
+              <tr className="border-b border-border/50">
+                <td className="py-2 pr-4">Hono</td>
+                <td className="py-2"><code>pnpm --filter secretdef-example-hono dev</code></td>
+              </tr>
+              <tr>
+                <td className="py-2 pr-4">Next.js</td>
+                <td className="py-2"><code>pnpm --filter secretdef-example-nextjs dev</code></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          Try <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">dev:ok</code> (all secrets set), <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">dev:missing</code> (missing in dev — warns), and <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">dev:production</code> (missing in prod — exits) to see the different behaviors.
+        </p>
       </section>
 
       {/* API Reference */}
@@ -362,6 +469,15 @@ export default function Page() {
           </div>
           <div>
             <h3 className="font-mono text-base font-semibold text-foreground">
+              builtinValidators
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Record of all built-in validator functions (<code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">str</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">bool</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">num</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">email</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">host</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">port</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">url</code>, <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">json</code>).
+              Exported for advanced use — typically you just pass the name as a string to <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">validate</code>.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-mono text-base font-semibold text-foreground">
               SecretSpec
             </h3>
             <div className="mt-2">
@@ -397,7 +513,7 @@ export default function Page() {
             </span>
           </li>
           <li>
-            <strong className="text-foreground">Use envOverrides for dev/staging differences.</strong>
+            <strong className="text-foreground">Use environments for dev/staging differences.</strong>
             <span className="text-sm text-muted-foreground ml-1">
               Stripe test keys, local database URLs, optional webhooks — declare the
               differences per environment instead of documenting them elsewhere.

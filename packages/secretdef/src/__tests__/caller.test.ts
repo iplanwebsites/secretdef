@@ -29,7 +29,7 @@ describe('getCallerFile', () => {
 describe('getCallerFile via defineSecrets (integration)', () => {
   it('captures the registering file when used via auto-register', () => {
     enableAutoRegister();
-    defineSecrets({ TEST_KEY: { envVar: 'TEST_VAR' } });
+    defineSecrets({ TEST_KEY: {} });
 
     const registry = getRegistry();
     const entry = registry.get('TEST_KEY');
@@ -44,8 +44,8 @@ describe('getCallerFile via defineSecrets (integration)', () => {
     enableAutoRegister();
 
     // Both calls are in the same file, so registeredBy will be the same
-    defineSecrets({ KEY_A: { envVar: 'A' } });
-    defineSecrets({ KEY_B: { envVar: 'B' } });
+    defineSecrets({ KEY_A: {} });
+    defineSecrets({ KEY_B: {} });
 
     const registry = getRegistry();
     const a = registry.get('KEY_A');

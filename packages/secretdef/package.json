@@ -1,6 +1,6 @@
 {
   "name": "secretdef",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Declare the secrets your packages require. Fail fast with actionable errors.",
   "type": "module",
   "main": "./dist/index.cjs",

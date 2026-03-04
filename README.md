@@ -53,18 +53,15 @@ import { defineSecrets } from "secretdef";
 
 export const secrets = defineSecrets({
   STRIPE_SECRET_KEY: {
-    envVar: "STRIPE_SECRET_KEY",
     description: "Stripe API secret key — https://dashboard.stripe.com/apikeys",
-    envOverrides: {
+    environments: {
       development: { envVar: "STRIPE_TEST_SECRET_KEY" },
     },
   },
   DATABASE_URL: {
-    envVar: "DATABASE_URL",
     description: "Postgres connection string — check your hosting dashboard",
   },
   SENDGRID_API_KEY: {
-    envVar: "SENDGRID_API_KEY",
     description:
       "SendGrid API key — https://app.sendgrid.com/settings/api_keys",
   },
