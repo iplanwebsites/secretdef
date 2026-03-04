@@ -1,0 +1,20 @@
+{
+  "name": "@secretdef/openai",
+  "version": "0.0.1",
+  "description": "Secret definitions for OpenAI",
+  "type": "module",
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "files": ["index.ts"],
+  "scripts": {},
+  "peerDependencies": {
+    "secretdef": "workspace:*"
+  },
+  "license": "MIT",
+  "homepage": "https://secretdef.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iplanwebsites/secretdef",
+    "directory": "packages/@secretdef/openai"
+  }
+}

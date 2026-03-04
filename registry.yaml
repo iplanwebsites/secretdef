@@ -1,0 +1,81 @@
+# Packages and services using secretdef
+# Add your package here — open a PR!
+# https://github.com/iplanwebsites/secretdef/edit/main/registry.yaml
+
+packages:
+  # Official @secretdef/* definitions
+  - name: "@secretdef/stripe"
+    npm: stripe
+    category: payment
+
+  - name: "@secretdef/paypal"
+    npm: "@paypal/checkout-server-sdk"
+    category: payment
+
+  - name: "@secretdef/openai"
+    npm: openai
+    category: ai
+
+  - name: "@secretdef/anthropic"
+    npm: "@anthropic-ai/sdk"
+    category: ai
+
+  - name: "@secretdef/supabase"
+    npm: "@supabase/supabase-js"
+    category: auth
+
+  - name: "@secretdef/clerk"
+    npm: "@clerk/nextjs"
+    category: auth
+
+  - name: "@secretdef/auth0"
+    npm: auth0
+    category: auth
+
+  - name: "@secretdef/firebase"
+    npm: firebase-admin
+    category: auth
+
+  - name: "@secretdef/sendgrid"
+    npm: "@sendgrid/mail"
+    category: email
+
+  - name: "@secretdef/resend"
+    npm: resend
+    category: email
+
+  - name: "@secretdef/postmark"
+    npm: postmark
+    category: email
+
+  - name: "@secretdef/aws"
+    npm: "@aws-sdk/client-s3"
+    category: cloud
+
+  - name: "@secretdef/gcp"
+    npm: "@google-cloud/storage"
+    category: cloud
+
+  - name: "@secretdef/planetscale"
+    npm: "@planetscale/database"
+    category: database
+
+  - name: "@secretdef/neon"
+    npm: "@neondatabase/serverless"
+    category: database
+
+  - name: "@secretdef/turso"
+    npm: "@libsql/client"
+    category: database
+
+  - name: "@secretdef/twilio"
+    npm: twilio
+    category: messaging
+
+  - name: "@secretdef/segment"
+    npm: analytics-node
+    category: analytics
+
+  - name: "@secretdef/mixpanel"
+    npm: mixpanel
+    category: analytics

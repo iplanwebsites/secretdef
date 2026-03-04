@@ -1,0 +1,15 @@
+{
+  "name": "create-secretdef",
+  "version": "0.0.1",
+  "private": true,
+  "description": "CLI scaffold tool for secretdef (Phase 2 — not yet implemented)",
+  "type": "module",
+  "bin": {
+    "create-secretdef": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "echo 'Phase 2 — not yet implemented'",
+    "typecheck": "echo 'Phase 2 — not yet implemented'"
+  },
+  "license": "MIT"
+}
