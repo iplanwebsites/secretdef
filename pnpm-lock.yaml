@@ -170,118 +170,148 @@ importers:
         version: 2.1.9(@types/node@22.19.13)
 
   packages/@secretdef/anthropic:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
-
-  packages/@secretdef/auth0:
-    dependencies:
-      secretdef:
-        specifier: workspace:*
-        version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/aws:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/clerk:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/firebase:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/gcp:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
-
-  packages/@secretdef/mixpanel:
-    dependencies:
-      secretdef:
-        specifier: workspace:*
-        version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/neon:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/openai:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
-
-  packages/@secretdef/paypal:
-    dependencies:
-      secretdef:
-        specifier: workspace:*
-        version: link:../../secretdef
-
-  packages/@secretdef/planetscale:
-    dependencies:
-      secretdef:
-        specifier: workspace:*
-        version: link:../../secretdef
-
-  packages/@secretdef/postmark:
-    dependencies:
-      secretdef:
-        specifier: workspace:*
-        version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/resend:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
-
-  packages/@secretdef/segment:
-    dependencies:
-      secretdef:
-        specifier: workspace:*
-        version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/sendgrid:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/stripe:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/supabase:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
-
-  packages/@secretdef/turso:
-    dependencies:
-      secretdef:
-        specifier: workspace:*
-        version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/@secretdef/twilio:
-    dependencies:
+    devDependencies:
       secretdef:
         specifier: workspace:*
         version: link:../../secretdef
+      tsup:
+        specifier: ^8.3.0
+        version: 8.5.1(jiti@1.21.7)(postcss@8.5.8)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
 
   packages/create-secretdef: {}
 

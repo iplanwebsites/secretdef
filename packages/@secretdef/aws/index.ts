@@ -11,4 +11,8 @@ export const secrets = defineSecrets({
     description: 'AWS region — https://docs.aws.amazon.com/general/latest/gr/rande.html',
     required: false,
   },
+  AWS_PROFILE: {
+    description: 'AWS named profile — https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-profiles.html',
+    required: false,
+  },
 });

@@ -41,3 +41,8 @@ export interface RegisteredSecret extends SecretSpec {
 export interface ValidateOptions {
   mode?: 'error' | 'warn';
 }
+
+/** Extracts a typed env object from defineSecrets output. Maps every key to string. */
+export type EnvFrom<T extends Record<string, SecretSpec | SecretInput>> = {
+  [K in keyof T]: string;
+};

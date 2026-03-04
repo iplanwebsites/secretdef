@@ -2,7 +2,7 @@ import type { SecretSpec, SecretInput } from './types.js';
 import { autoRegisterSpecs } from './registry.js';
 import { normalizeSpecs } from './normalize.js';
 
-export type { SecretSpec, SecretInput, RegisteredSecret, ValidateOptions, BuiltinValidator, CustomValidator, SecretValidation } from './types.js';
+export type { SecretSpec, SecretInput, RegisteredSecret, ValidateOptions, BuiltinValidator, CustomValidator, SecretValidation, EnvFrom } from './types.js';
 export { validateSecrets } from './validate.js';
 export type { ValidatedSecrets } from './validate.js';
 export { useSecret, SecretNotAvailableError, SecretValidationError } from './accessor.js';

@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useData } from 'vike-react/useData';
 import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
-import { CodeBlock, TerminalBlock, InstallCommand } from '../../components/code-block';
+import { CodeBlock, TerminalBlock, InstallCommand, fireConfettiFromElement } from '../../components/code-block';
 import { Logo } from '../../components/logo';
 import { ArrowRight, Github, Package, Shield, Cpu, Blocks, Copy, Check } from 'lucide-react';
 import type { Data } from './+data';
@@ -69,6 +69,77 @@ const key = useSecret('STRIPE_SECRET_KEY');
 //
 // vs: TypeError: Cannot read properties of undefined`;
 
+const sdkExamples = {
+  resend: {
+    label: 'Resend',
+    code: `import { Resend } from 'resend';
+import { validateSecrets } from 'secretdef';
+import { secrets } from '@secretdef/resend';
+
+const env = validateSecrets(secrets);
+const resend = new Resend(env.RESEND_API_KEY);`,
+    highlightLines: [2, 3, 5],
+    terminal: {
+      error: '🔴 Missing 1 secret(s) [env=production]:',
+      details: `  ✗ RESEND_API_KEY
+    Resend API key — https://resend.com/api-keys
+    from: @secretdef/resend`,
+    },
+  },
+  openai: {
+    label: 'OpenAI',
+    code: `import OpenAI from 'openai';
+import { validateSecrets } from 'secretdef';
+import { secrets } from '@secretdef/openai';
+
+const env = validateSecrets(secrets);
+const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });`,
+    highlightLines: [2, 3, 5],
+    terminal: {
+      error: '🔴 Missing 1 secret(s) [env=production]:',
+      details: `  ✗ OPENAI_API_KEY
+    OpenAI API key — https://platform.openai.com/api-keys
+    from: @secretdef/openai`,
+    },
+  },
+  stripe: {
+    label: 'Stripe',
+    code: `import Stripe from 'stripe';
+import { validateSecrets } from 'secretdef';
+import { secrets } from '@secretdef/stripe';
+
+const env = validateSecrets(secrets);
+const stripe = new Stripe(env.STRIPE_SECRET_KEY);`,
+    highlightLines: [2, 3, 5],
+    terminal: {
+      error: '🔴 Missing 2 secret(s) [env=production]:',
+      details: `  ✗ STRIPE_SECRET_KEY
+    Stripe API secret key — https://dashboard.stripe.com/apikeys
+    from: @secretdef/stripe
+
+  ✗ STRIPE_PUBLISHABLE_KEY
+    Publishable key — https://dashboard.stripe.com/apikeys
+    from: @secretdef/stripe`,
+    },
+  },
+  anthropic: {
+    label: 'Anthropic',
+    code: `import Anthropic from '@anthropic-ai/sdk';
+import { validateSecrets } from 'secretdef';
+import { secrets } from '@secretdef/anthropic';
+
+const env = validateSecrets(secrets);
+const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });`,
+    highlightLines: [2, 3, 5],
+    terminal: {
+      error: '🔴 Missing 1 secret(s) [env=production]:',
+      details: `  ✗ ANTHROPIC_API_KEY
+    Anthropic API key — https://console.anthropic.com/settings/keys
+    from: @secretdef/anthropic`,
+    },
+  },
+} as const;
+
 export default function Page() {
   const { packages } = useData<Data>();
   return (
@@ -89,8 +160,8 @@ export default function Page() {
       </h1>
 
       <p className="mt-6 text-xl text-muted-foreground max-w-2xl">
-        Every service you integrate needs API keys, tokens, and connection strings.{' '}
-        <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">secretdef</code> is a standard way for modules to declare which secrets they need
+        Define required API keys, tokens, and connection strings.{' '}
+        <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">secretdef</code> is a standard way for modules to what they need
         and where to get them.
       </p>
 
@@ -218,6 +289,9 @@ export default function Page() {
         </div>
       </div>
 
+      {/* SDK example with tabs */}
+      <SdkExampleBlock />
+
       {/* AI agents — moved up */}
       <Card className="mt-16 border-primary/20 bg-primary/5">
         <CardHeader>
@@ -296,8 +370,10 @@ export default function Page() {
         </p>
 
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {packages.map((pkg) => (
-            <SdkPackage key={pkg.name} name={pkg.name} npm={pkg.npm} />
+          {packages
+            .sort((a, b) => (b.hasEnvVars ? 1 : 0) - (a.hasEnvVars ? 1 : 0))
+            .map((pkg) => (
+            <SdkPackage key={pkg.name} name={pkg.name} title={pkg.title} npm={pkg.npm} hasEnvVars={pkg.hasEnvVars} />
           ))}
         </div>
 
@@ -369,14 +445,59 @@ function ProblemCard({
   );
 }
 
-function SdkPackage({ name, npm }: { name: string; npm: string }) {
-  return (
-    <div className="flex flex-col rounded-lg border border-border/50 px-3 py-2.5 bg-card gap-1 opacity-60">
-      <div className="flex items-center justify-between gap-2">
-        <code className="text-sm font-mono font-semibold text-foreground truncate">{name}</code>
-        <span className="shrink-0 text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">soon</span>
+function generatePrompt(name: string, npm: string) {
+  return `Install ${name} and wire it into this codebase:
+1. npm i secretdef ${name}
+2. Find where "${npm}" is imported and process.env is used for its config. Import the secrets from "${name}" and use them instead of raw process.env access.
+3. In the server/app entry point, import validateSecrets from "secretdef" and call it with the imported secrets so missing keys are caught at startup — not at runtime.
+
+This requires editing at least 2 files: where the SDK is used, and the app entry point.`;
+}
+
+function SdkPackage({ name, title, npm, hasEnvVars }: { name: string; title?: string; npm: string; hasEnvVars?: boolean }) {
+  const [copied, setCopied] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(generatePrompt(name, npm));
+      setCopied(true);
+      if (buttonRef.current) fireConfettiFromElement(buttonRef.current);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* */ }
+  };
+
+  if (!hasEnvVars) {
+    return (
+      <div className="flex flex-col rounded-lg border border-border/50 px-3 py-2.5 bg-card gap-1.5 opacity-50">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-sm font-semibold text-foreground">{title || name}</span>
+          <span className="shrink-0 text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">soon</span>
+        </div>
+        <span className="text-xs text-muted-foreground font-mono truncate">
+          <a href={`https://www.npmjs.com/package/${npm}`} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">{npm}</a>
+        </span>
       </div>
-      <span className="text-xs text-muted-foreground font-mono truncate">↳ {npm}</span>
+    );
+  }
+
+  return (
+    <div className="flex flex-col rounded-lg border border-primary/30 px-3 py-2.5 bg-card gap-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-semibold text-foreground">{title || name}</span>
+        <button
+          ref={buttonRef}
+          onClick={handleCopy}
+          className="shrink-0 inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground hover:text-foreground border border-border rounded px-1.5 py-0.5 transition-colors cursor-pointer"
+        >
+          {copied ? <Check className="h-2.5 w-2.5" /> : <Copy className="h-2.5 w-2.5" />}
+          {copied ? 'Copied!' : 'Copy prompt'}
+        </button>
+      </div>
+      <div className="flex flex-col gap-0.5 text-xs text-muted-foreground font-mono">
+        <a href={`https://www.npmjs.com/package/${name}`} target="_blank" rel="noopener noreferrer" className="truncate hover:text-foreground transition-colors">{name}</a>
+        <a href={`https://www.npmjs.com/package/${npm}`} target="_blank" rel="noopener noreferrer" className="truncate hover:text-foreground transition-colors">↳ {npm}</a>
+      </div>
     </div>
   );
 }
@@ -384,12 +505,25 @@ function SdkPackage({ name, npm }: { name: string; npm: string }) {
 function QuickStartBlock() {
   const [tab, setTab] = useState<'prompt' | 'skill'>('prompt');
   const [copied, setCopied] = useState(false);
+  const [skillCopied, setSkillCopied] = useState(false);
+  const copyButtonRef = useRef<HTMLButtonElement>(null);
+  const skillCopyButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(agentPrompt);
       setCopied(true);
+      if (copyButtonRef.current) fireConfettiFromElement(copyButtonRef.current);
       setTimeout(() => setCopied(false), 1500);
+    } catch { /* */ }
+  };
+
+  const handleSkillCopy = async () => {
+    try {
+      await navigator.clipboard.writeText('npx skills add iplanwebsites/secretdef');
+      setSkillCopied(true);
+      if (skillCopyButtonRef.current) fireConfettiFromElement(skillCopyButtonRef.current);
+      setTimeout(() => setSkillCopied(false), 1500);
     } catch { /* */ }
   };
 
@@ -428,6 +562,7 @@ function QuickStartBlock() {
         <div className="mt-3">
           <div className="relative rounded-lg bg-[#0d1117] border border-border p-4">
             <button
+              ref={copyButtonRef}
               onClick={handleCopy}
               className="absolute top-3 right-3 flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200 transition-colors"
             >
@@ -441,7 +576,15 @@ function QuickStartBlock() {
 
       {tab === 'skill' && (
         <div className="mt-3 space-y-3">
-          <div className="rounded-lg bg-[#0d1117] border border-border p-3 font-mono text-sm text-gray-300">
+          <div className="relative rounded-lg bg-[#0d1117] border border-border p-3 font-mono text-sm text-gray-300">
+            <button
+              ref={skillCopyButtonRef}
+              onClick={handleSkillCopy}
+              className="absolute top-2.5 right-3 flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200 transition-colors"
+            >
+              {skillCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+              {skillCopied ? 'Copied' : 'Copy'}
+            </button>
             <span className="text-gray-500 select-none">$ </span>npx skills add iplanwebsites/secretdef
           </div>
           <p className="text-sm text-muted-foreground">
@@ -452,6 +595,61 @@ function QuickStartBlock() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+type SdkKey = keyof typeof sdkExamples;
+const sdkKeys = Object.keys(sdkExamples) as SdkKey[];
+
+function SdkExampleBlock() {
+  const [active, setActive] = useState<SdkKey>('resend');
+  const example = sdkExamples[active];
+
+  return (
+    <div className="mt-16">
+      <h2 className="text-3xl font-bold text-foreground">
+        Two lines. Fail at startup, not at 2am.
+      </h2>
+      <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
+        Most SDKs already read <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">process.env</code> internally.
+        Add two lines and missing keys fail on server start — not when a user hits the code path.
+      </p>
+
+      <div className="mt-6 flex gap-2">
+        {sdkKeys.map((key) => (
+          <button
+            key={key}
+            onClick={() => setActive(key)}
+            className={`px-3 py-1.5 text-xs font-semibold rounded-md transition-colors ${
+              active === key
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {sdkExamples[key].label}
+          </button>
+        ))}
+      </div>
+
+      <div className="mt-4">
+        <CodeBlock
+          code={example.code}
+          language="typescript"
+          filename="server.ts"
+          highlightLines={[...example.highlightLines]}
+        />
+      </div>
+
+      <div className="mt-3">
+        <TerminalBlock>
+          <div className="text-red-400">{example.terminal.error}</div>
+          <div className="text-gray-300 mt-2 whitespace-pre-line">
+            {example.terminal.details}
+          </div>
+          <div className="text-red-400 mt-2">{'Process exited with code 1'}</div>
+        </TerminalBlock>
+      </div>
     </div>
   );
 }

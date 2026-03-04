@@ -13,4 +13,20 @@ export const secrets = defineSecrets({
       development: { required: false },
     },
   },
+  FIREBASE_AUTH_EMULATOR_HOST: {
+    description: 'Firebase Auth emulator host — https://firebase.google.com/docs/emulator-suite',
+    required: false,
+  },
+  FIRESTORE_EMULATOR_HOST: {
+    description: 'Firestore emulator host — https://firebase.google.com/docs/emulator-suite',
+    required: false,
+  },
+  FIREBASE_DATABASE_EMULATOR_HOST: {
+    description: 'Realtime Database emulator host — https://firebase.google.com/docs/emulator-suite',
+    required: false,
+  },
+  FIREBASE_STORAGE_EMULATOR_HOST: {
+    description: 'Cloud Storage emulator host — https://firebase.google.com/docs/emulator-suite',
+    required: false,
+  },
 });

@@ -3,79 +3,163 @@
 # https://github.com/iplanwebsites/secretdef/edit/main/registry.yaml
 
 packages:
-  # Official @secretdef/* definitions
-  - name: "@secretdef/stripe"
-    npm: stripe
-    category: payment
-
-  - name: "@secretdef/paypal"
-    npm: "@paypal/checkout-server-sdk"
-    category: payment
-
+  # --- AI ---
   - name: "@secretdef/openai"
+    title: OpenAI
     npm: openai
     category: ai
+    repo: openai/openai-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
 
   - name: "@secretdef/anthropic"
+    title: Anthropic
     npm: "@anthropic-ai/sdk"
     category: ai
+    repo: anthropics/anthropic-sdk-typescript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
 
+  # --- Payment ---
+  - name: "@secretdef/stripe"
+    title: Stripe
+    npm: stripe
+    category: payment
+    repo: stripe/stripe-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Auth ---
   - name: "@secretdef/supabase"
+    title: Supabase
     npm: "@supabase/supabase-js"
     category: auth
+    repo: supabase/supabase-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
 
   - name: "@secretdef/clerk"
-    npm: "@clerk/nextjs"
+    title: Clerk
+    npm: "@clerk/clerk-sdk-node"
     category: auth
-
-  - name: "@secretdef/auth0"
-    npm: auth0
-    category: auth
+    repo: clerk/javascript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
 
   - name: "@secretdef/firebase"
-    npm: firebase-admin
+    title: Firebase
+    npm: firebase
     category: auth
+    repo: firebase/firebase-js-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
 
-  - name: "@secretdef/sendgrid"
-    npm: "@sendgrid/mail"
-    category: email
+  - name: "@secretdef/auth0"
+    title: Auth0
+    npm: auth0
+    category: auth
+    repo: auth0/node-auth0
+    hasEnvVars: false
+    dateEvaluated: "2026-03-04"
 
+  # --- Email ---
   - name: "@secretdef/resend"
+    title: Resend
     npm: resend
     category: email
+    repo: resend/resend-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/sendgrid"
+    title: SendGrid
+    npm: "@sendgrid/mail"
+    category: email
+    repo: sendgrid/sendgrid-nodejs
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
 
   - name: "@secretdef/postmark"
+    title: Postmark
     npm: postmark
     category: email
+    repo: ActiveCampaign/postmark.js
+    hasEnvVars: false
+    dateEvaluated: "2026-03-04"
 
+  # --- Cloud ---
   - name: "@secretdef/aws"
+    title: AWS
     npm: "@aws-sdk/client-s3"
     category: cloud
+    repo: aws/aws-sdk-js-v3
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
 
   - name: "@secretdef/gcp"
+    title: Google Cloud
     npm: "@google-cloud/storage"
     category: cloud
+    repo: googleapis/google-auth-library-nodejs
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
 
-  - name: "@secretdef/planetscale"
-    npm: "@planetscale/database"
-    category: database
-
+  # --- Database ---
   - name: "@secretdef/neon"
+    title: Neon
     npm: "@neondatabase/serverless"
     category: database
+    repo: neondatabase/serverless
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/planetscale"
+    title: PlanetScale
+    npm: "@planetscale/database"
+    category: database
+    repo: planetscale/database-js
+    hasEnvVars: false
+    dateEvaluated: "2026-03-04"
 
   - name: "@secretdef/turso"
+    title: Turso
     npm: "@libsql/client"
     category: database
+    repo: tursodatabase/libsql-client-ts
+    hasEnvVars: false
+    dateEvaluated: "2026-03-04"
 
+  # --- Messaging ---
   - name: "@secretdef/twilio"
+    title: Twilio
     npm: twilio
     category: messaging
+    repo: twilio/twilio-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
 
+  # --- Analytics ---
   - name: "@secretdef/segment"
-    npm: analytics-node
+    title: Segment
+    npm: "@segment/analytics-node"
     category: analytics
+    repo: segmentio/analytics-node
+    hasEnvVars: false
+    dateEvaluated: "2026-03-04"
 
   - name: "@secretdef/mixpanel"
+    title: Mixpanel
     npm: mixpanel
     category: analytics
+    repo: mixpanel/mixpanel-node
+    hasEnvVars: false
+    dateEvaluated: "2026-03-04"
+
+  # --- Payment (no env vars) ---
+  - name: "@secretdef/paypal"
+    title: PayPal
+    npm: paypal-rest-sdk
+    category: payment
+    repo: paypal/paypal-checkout-components
+    hasEnvVars: false
+    dateEvaluated: "2026-03-04"

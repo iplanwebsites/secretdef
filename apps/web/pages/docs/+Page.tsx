@@ -187,6 +187,38 @@ npx skills add iplanwebsites/secretdef
 .cursor/skills/secretdef/SKILL.md   # Cursor
 # ... auto-detected for each agent`;
 
+const envFromCode = `import type { EnvFrom } from 'secretdef';
+import { secrets } from './secrets';
+
+// Derive a typed env object from your definitions
+type Env = EnvFrom<typeof secrets>;
+// = { DATABASE_URL: string; STRIPE_KEY: string; ANALYTICS_KEY: string }`;
+
+const processEnvAugmentCode = `// src/env.d.ts — create this file once
+import type { EnvFrom } from 'secretdef';
+import { secrets } from './secrets';
+
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv extends EnvFrom<typeof secrets> {}
+  }
+}`;
+
+const multiModuleAugmentCode = `// src/env.d.ts — combine multiple modules
+import type { EnvFrom } from 'secretdef';
+import { secrets as app } from './secrets';
+import { secrets as db } from './modules/db/secrets';
+import { secrets as email } from './modules/email/secrets';
+
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv extends
+      EnvFrom<typeof app>,
+      EnvFrom<typeof db>,
+      EnvFrom<typeof email> {}
+  }
+}`;
+
 export default function Page() {
   return (
     <div className="max-w-3xl mx-auto px-6 py-16">
@@ -211,6 +243,8 @@ export default function Page() {
           <li><a href="#examples" className="hover:text-foreground transition-colors">Framework examples</a></li>
           <li><a href="#api" className="hover:text-foreground transition-colors">API reference</a></li>
           <li><a href="#best-practices" className="hover:text-foreground transition-colors">Best practices</a></li>
+          <li><a href="#typescript" className="hover:text-foreground transition-colors">TypeScript integration <span className="text-[10px] text-yellow-500 ml-1">experimental</span></a></li>
+          <li><a href="#comparison" className="hover:text-foreground transition-colors">Comparison with alternatives <span className="text-[10px] text-yellow-500 ml-1">experimental</span></a></li>
           <li><a href="#claude-md" className="hover:text-foreground transition-colors">CLAUDE.md integration</a></li>
           <li><a href="#claude-skill" className="hover:text-foreground transition-colors">Claude Code skill</a></li>
           <li><a href="#community-packages" className="hover:text-foreground transition-colors">Community packages</a></li>
@@ -531,6 +565,161 @@ export default function Page() {
           <h3 className="text-base font-semibold text-foreground">Example project structure</h3>
           <div className="mt-3">
             <CodeBlock code={moduleSecretsCode} language="typescript" filename="src/modules/db/secrets.ts" />
+          </div>
+        </div>
+      </section>
+
+      {/* TypeScript integration */}
+      <section id="typescript" className="mt-12">
+        <h2 className="text-2xl font-bold text-foreground">TypeScript integration <Badge variant="outline" className="ml-2 text-[10px] text-yellow-500 border-yellow-500/50">experimental</Badge></h2>
+        <p className="mt-3 text-muted-foreground">
+          secretdef preserves your secret keys as literal types. Use the{' '}
+          <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">EnvFrom</code> type helper to
+          derive a typed environment object from your definitions — no code generation needed.
+        </p>
+
+        <div className="mt-6">
+          <h3 className="text-base font-semibold text-foreground">EnvFrom type helper</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Maps every key from your <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">defineSecrets</code> call to <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">string</code>.
+          </p>
+          <div className="mt-3">
+            <CodeBlock code={envFromCode} language="typescript" filename="src/env.ts" />
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <h3 className="text-base font-semibold text-foreground">Augment process.env</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Get autocomplete on <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">process.env</code> across
+            your entire project. Create this file once — it stays in sync automatically because it
+            references your <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">secrets</code> object.
+          </p>
+          <div className="mt-3">
+            <CodeBlock code={processEnvAugmentCode} language="typescript" filename="src/env.d.ts" />
+          </div>
+        </div>
+
+        <div className="mt-6">
+          <h3 className="text-base font-semibold text-foreground">Multiple modules</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Combine secrets from multiple modules with{' '}
+            <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">extends</code>:
+          </p>
+          <div className="mt-3">
+            <CodeBlock code={multiModuleAugmentCode} language="typescript" filename="src/env.d.ts" />
+          </div>
+          <p className="mt-3 text-sm text-muted-foreground">
+            Now <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">process.env.DATABASE_URL</code> autocompletes
+            everywhere, and <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">validateSecrets()</code> catches
+            missing values at runtime. One source of truth, both type safety and runtime validation.
+          </p>
+        </div>
+      </section>
+
+      {/* Comparison */}
+      <section id="comparison" className="mt-12">
+        <h2 className="text-2xl font-bold text-foreground">Comparison with alternatives <Badge variant="outline" className="ml-2 text-[10px] text-yellow-500 border-yellow-500/50">experimental</Badge></h2>
+        <p className="mt-3 text-muted-foreground">
+          There's no standard way to declare secret requirements in the JS/TS ecosystem.
+          Here's how secretdef compares to common approaches.
+        </p>
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 pr-4 font-semibold text-foreground">Approach</th>
+                <th className="text-left py-2 pr-4 font-semibold text-foreground">Type safety</th>
+                <th className="text-left py-2 pr-4 font-semibold text-foreground">Runtime validation</th>
+                <th className="text-left py-2 pr-4 font-semibold text-foreground">Descriptions / URLs</th>
+                <th className="text-left py-2 pr-4 font-semibold text-foreground">Shareable via npm</th>
+                <th className="text-left py-2 font-semibold text-foreground">AI-readable errors</th>
+              </tr>
+            </thead>
+            <tbody className="text-muted-foreground">
+              <tr className="border-b border-border/50">
+                <td className="py-3 pr-4 font-medium text-foreground">secretdef</td>
+                <td className="py-3 pr-4 text-green-400">Yes</td>
+                <td className="py-3 pr-4 text-green-400">Yes</td>
+                <td className="py-3 pr-4 text-green-400">Yes</td>
+                <td className="py-3 pr-4 text-green-400">Yes</td>
+                <td className="py-3 text-green-400">Yes</td>
+              </tr>
+              <tr className="border-b border-border/50">
+                <td className="py-3 pr-4 font-medium text-foreground">env.d.ts</td>
+                <td className="py-3 pr-4 text-green-400">Yes</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 text-red-400">No</td>
+              </tr>
+              <tr className="border-b border-border/50">
+                <td className="py-3 pr-4 font-medium text-foreground">.env.example</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 pr-4 text-yellow-400">Comments only</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 text-red-400">No</td>
+              </tr>
+              <tr className="border-b border-border/50">
+                <td className="py-3 pr-4 font-medium text-foreground">Zod + process.env</td>
+                <td className="py-3 pr-4 text-green-400">Yes</td>
+                <td className="py-3 pr-4 text-green-400">Yes</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 pr-4 text-yellow-400">Manual</td>
+                <td className="py-3 text-red-400">No</td>
+              </tr>
+              <tr className="border-b border-border/50">
+                <td className="py-3 pr-4 font-medium text-foreground">envalid</td>
+                <td className="py-3 pr-4 text-green-400">Yes</td>
+                <td className="py-3 pr-4 text-green-400">Yes</td>
+                <td className="py-3 pr-4 text-yellow-400">desc only</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 text-red-400">No</td>
+              </tr>
+              <tr>
+                <td className="py-3 pr-4 font-medium text-foreground">process.env.X</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 pr-4 text-red-400">No</td>
+                <td className="py-3 text-red-400">No</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="mt-6 space-y-4">
+          <div>
+            <h3 className="text-base font-semibold text-foreground">env.d.ts</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              TypeScript ambient declarations for <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">ProcessEnv</code>.
+              Great for autocomplete, but erased at compile time — no runtime checks, no metadata, and not shareable across packages.
+              secretdef can complement <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">env.d.ts</code> (or even generate one).
+            </p>
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-foreground">.env.example</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              A convention for documenting env vars in a flat file. No runtime effect, no validation,
+              and comments tend to go stale. Useful as a quick reference but doesn't prevent startup failures.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-foreground">Zod + process.env</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Parsing <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">process.env</code> through a Zod schema gives type safety and validation,
+              but lacks structured metadata (descriptions, dashboard URLs, source file tracking) and
+              isn't designed to be shared across packages.
+            </p>
+          </div>
+          <div>
+            <h3 className="text-base font-semibold text-foreground">envalid</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              A solid validation library with <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">desc</code> support.
+              secretdef adds dashboard URLs, per-environment overrides, AI-readable error output,
+              and the <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">@secretdef/*</code> ecosystem for sharing definitions across projects.
+            </p>
           </div>
         </div>
       </section>

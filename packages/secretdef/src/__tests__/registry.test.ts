@@ -7,16 +7,18 @@ beforeEach(() => {
 });
 
 describe('defineSecrets', () => {
-  it('returns pure data without auto-register', () => {
+  it('always registers specs in the global registry', () => {
     const specs = defineSecrets({
       MY_KEY: { description: 'test' },
     });
 
     expect(specs).toEqual({ MY_KEY: { description: 'test' } });
-    expect(getRegistry().size).toBe(0);
+    expect(getRegistry().size).toBe(1);
+    expect(getRegistry().get('MY_KEY')?.description).toBe('test');
+    expect(getRegistry().get('MY_KEY')?.registeredBy).toBeTruthy();
   });
 
-  it('registers specs when auto-register is enabled', () => {
+  it('enableAutoRegister is a backward-compatible no-op', () => {
     enableAutoRegister();
 
     defineSecrets({
@@ -26,40 +28,27 @@ describe('defineSecrets', () => {
     const registry = getRegistry();
     expect(registry.size).toBe(1);
     expect(registry.get('MY_KEY')?.description).toBe('test');
-    expect(registry.get('MY_KEY')?.registeredBy).toBeTruthy();
   });
 
-  it('throws on duplicate keys when auto-register is enabled', () => {
-    enableAutoRegister();
-
+  it('throws on duplicate keys', () => {
     defineSecrets({ DUPE: {} });
 
     expect(() =>
       defineSecrets({ DUPE: {} })
     ).toThrowError(/Duplicate secret "DUPE"/);
   });
-
-  it('allows same key in separate calls without auto-register (pure data)', () => {
-    const a = defineSecrets({ KEY: { description: 'a' } });
-    const b = defineSecrets({ KEY: { description: 'b' } });
-
-    expect(a.KEY.description).toBe('a');
-    expect(b.KEY.description).toBe('b');
-    expect(getRegistry().size).toBe(0);
-  });
 });
 
 describe('clearRegistry', () => {
-  it('removes all registered secrets and resets auto-register', () => {
-    enableAutoRegister();
+  it('removes all registered secrets', () => {
     defineSecrets({ A: {} });
     expect(getRegistry().size).toBe(1);
 
     clearRegistry();
     expect(getRegistry().size).toBe(0);
 
-    // auto-register should be off after clear
+    // Can re-register after clear
     defineSecrets({ B: {} });
-    expect(getRegistry().size).toBe(0);
+    expect(getRegistry().size).toBe(1);
   });
 });

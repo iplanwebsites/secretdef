@@ -3,16 +3,30 @@ import confetti from 'canvas-confetti';
 import { cn } from '../lib/utils';
 import { Copy, Check } from 'lucide-react';
 
+export function fireConfettiFromElement(el: HTMLElement) {
+  const rect = el.getBoundingClientRect();
+  const x = (rect.left + rect.width / 2) / window.innerWidth;
+  const y = (rect.top + rect.height / 2) / window.innerHeight;
+  const colors = ['#E8630A', '#F59E0B', '#F97316', '#DC2626', '#FBBF24', '#FB923C'];
+  const defaults = { origin: { x, y }, disableForReducedMotion: true, colors };
+  confetti({ ...defaults, particleCount: 30, spread: 60, startVelocity: 35, angle: 90 });
+  confetti({ ...defaults, particleCount: 15, spread: 80, startVelocity: 45, angle: 60 });
+  confetti({ ...defaults, particleCount: 15, spread: 80, startVelocity: 45, angle: 120 });
+}
+
 interface CodeBlockProps {
   code: string;
   language?: string;
   filename?: string;
   className?: string;
+  /** 1-based line numbers to highlight in green (added lines) */
+  highlightLines?: number[];
 }
 
-export function CodeBlock({ code, language = 'typescript', filename, className }: CodeBlockProps) {
+export function CodeBlock({ code, language = 'typescript', filename, className, highlightLines }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
   const [highlightedHtml, setHighlightedHtml] = useState<string | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -20,17 +34,25 @@ export function CodeBlock({ code, language = 'typescript', filename, className }
       codeToHtml(code.trim(), {
         lang: language,
         theme: 'github-dark',
+        decorations: highlightLines?.map((line) => ({
+          start: { line: line - 1, character: 0 },
+          end: { line: line - 1, character: Infinity },
+          properties: { class: 'line-highlight-add' },
+        })),
       }).then((html) => {
         if (!cancelled) setHighlightedHtml(html);
       });
     });
     return () => { cancelled = true; };
-  }, [code, language]);
+  }, [code, language, highlightLines]);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(code.trim());
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(code.trim());
+      setCopied(true);
+      if (buttonRef.current) fireConfettiFromElement(buttonRef.current);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* clipboard unavailable */ }
   };
 
   return (
@@ -41,6 +63,7 @@ export function CodeBlock({ code, language = 'typescript', filename, className }
             {filename || language}
           </span>
           <button
+            ref={buttonRef}
             onClick={handleCopy}
             className="flex items-center gap-1 text-xs text-gray-400 hover:text-gray-200 transition-colors"
             aria-label="Copy code"
@@ -53,7 +76,7 @@ export function CodeBlock({ code, language = 'typescript', filename, className }
       <div className="p-4 overflow-x-auto text-sm leading-relaxed">
         {highlightedHtml ? (
           <div
-            className="[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!bg-transparent"
+            className="[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!bg-transparent [&_.line-highlight-add]:bg-green-500/15 [&_.line-highlight-add]:border-l-2 [&_.line-highlight-add]:border-green-400 [&_.line-highlight-add]:pl-3 [&_.line-highlight-add]:-ml-3"
             dangerouslySetInnerHTML={{ __html: highlightedHtml }}
           />
         ) : (
@@ -74,28 +97,16 @@ export function InstallCommand({ command }: InstallCommandProps) {
   const [copied, setCopied] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  const fireConfetti = useCallback(() => {
-    if (!buttonRef.current) return;
-    const rect = buttonRef.current.getBoundingClientRect();
-    const x = (rect.left + rect.width / 2) / window.innerWidth;
-    const y = (rect.top + rect.height / 2) / window.innerHeight;
-    const colors = ['#E8630A', '#F59E0B', '#F97316', '#DC2626', '#FBBF24', '#FB923C'];
-    const defaults = { origin: { x, y }, disableForReducedMotion: true, colors };
-    confetti({ ...defaults, particleCount: 30, spread: 60, startVelocity: 35, angle: 90 });
-    confetti({ ...defaults, particleCount: 15, spread: 80, startVelocity: 45, angle: 60 });
-    confetti({ ...defaults, particleCount: 15, spread: 80, startVelocity: 45, angle: 120 });
-  }, []);
-
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(command);
       setCopied(true);
-      fireConfetti();
+      if (buttonRef.current) fireConfettiFromElement(buttonRef.current);
       setTimeout(() => setCopied(false), 1500);
     } catch {
       /* clipboard unavailable */
     }
-  }, [command, fireConfetti]);
+  }, [command]);
 
   return (
     <div className="inline-flex items-center gap-3 bg-card border border-border rounded-lg px-4 py-2.5">

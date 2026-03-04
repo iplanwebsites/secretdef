@@ -4,8 +4,12 @@ import { parse } from 'yaml';
 
 export type SdkPackageEntry = {
   name: string;
+  title?: string;
   npm: string;
   category: string;
+  repo?: string;
+  hasEnvVars?: boolean;
+  dateEvaluated?: string;
 };
 
 export type Data = {

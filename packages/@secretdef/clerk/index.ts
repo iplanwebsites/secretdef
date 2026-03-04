@@ -3,14 +3,40 @@ import { defineSecrets } from 'secretdef';
 export const secrets = defineSecrets({
   CLERK_SECRET_KEY: {
     description: 'Clerk secret key — https://dashboard.clerk.com/last-active?path=api-keys',
-    environments: {
-      development: { envVar: 'CLERK_TEST_SECRET_KEY' },
-    },
   },
   CLERK_PUBLISHABLE_KEY: {
     description: 'Clerk publishable key — https://dashboard.clerk.com/last-active?path=api-keys',
-    environments: {
-      development: { envVar: 'CLERK_TEST_PUBLISHABLE_KEY' },
-    },
+  },
+  CLERK_JWT_KEY: {
+    description: 'Clerk JWT verification key — https://dashboard.clerk.com/last-active?path=api-keys',
+    required: false,
+  },
+  CLERK_SIGN_IN_URL: {
+    description: 'Sign-in page URL — https://clerk.com/docs/references/environment-variables',
+    required: false,
+  },
+  CLERK_DOMAIN: {
+    description: 'Clerk frontend API domain — https://clerk.com/docs/references/environment-variables',
+    required: false,
+  },
+  CLERK_PROXY_URL: {
+    description: 'Clerk proxy URL — https://clerk.com/docs/references/environment-variables',
+    required: false,
+  },
+  CLERK_API_URL: {
+    description: 'Clerk backend API URL — https://clerk.com/docs/references/environment-variables',
+    required: false,
+  },
+  CLERK_ENCRYPTION_KEY: {
+    description: 'Encryption key for Clerk session tokens — https://clerk.com/docs/references/environment-variables',
+    required: false,
+  },
+  CLERK_MACHINE_SECRET_KEY: {
+    description: 'Clerk machine-to-machine secret key — https://clerk.com/docs/references/environment-variables',
+    required: false,
+  },
+  CLERK_TELEMETRY_DISABLED: {
+    description: 'Disable Clerk telemetry — https://clerk.com/docs/references/environment-variables',
+    required: false,
   },
 });

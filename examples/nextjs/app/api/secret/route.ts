@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { useSecret } from 'secretdef';
-import { secrets } from '../../../secrets.js';
+import { secrets } from '../../../secrets';
 
 export function GET() {
   try {
