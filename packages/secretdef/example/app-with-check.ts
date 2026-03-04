@@ -4,9 +4,7 @@
  * This simulates a real app's env.ts / config.ts file.
  * Secrets are declared and validated inline — no separate files needed.
  */
-import { enableAutoRegister, defineSecrets, validateSecrets } from 'secretdef';
-
-enableAutoRegister();
+import { defineSecrets, validateSecrets } from 'secretdef';
 
 validateSecrets(defineSecrets({
   DATABASE_URL: 'PostgreSQL connection string',

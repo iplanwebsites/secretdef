@@ -3,7 +3,6 @@
  *
  * In your app's env/config module, add an early exit:
  *
- *   enableAutoRegister();
  *   validateSecrets(defineSecrets({ ... }));
  *   if (process.env.CHECK_SECRETS_ONLY === "1") process.exit(0);
  *

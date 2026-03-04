@@ -11,10 +11,10 @@ export { builtinValidators } from './validators.js';
 export { normalizeSpecs } from './normalize.js';
 
 /**
- * Declares secret requirements. Always returns normalized SecretSpec objects.
+ * Declares secret requirements. Always returns normalized SecretSpec objects
+ * and auto-registers them to the global registry.
  *
  * Values can be a SecretSpec object or a plain string (shorthand for `{ description: "..." }`).
- * If enableAutoRegister() has been called, also pushes specs into the global registry.
  * SDK authors call this once — consumers decide how to wire it up.
  */
 export function defineSecrets<T extends Record<string, SecretInput>>(

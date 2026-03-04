@@ -35,34 +35,33 @@ pnpm --filter secretdef-web build   # Production build
 
 ## Core library API
 
-Four exports + one opt-in:
+Core exports:
 
 ```ts
 import {
   defineSecrets,
   validateSecrets,
   useSecret,
-  enableAutoRegister,
 } from "secretdef";
 import type { SecretSpec } from "secretdef";
 ```
 
-- `defineSecrets(specs)` — Returns pure `Record<string, SecretSpec>`. If `enableAutoRegister()` was called, also pushes to global registry.
+- `defineSecrets(specs)` — Returns normalized `Record<string, SecretSpec>` and always auto-registers to the global registry.
 - `validateSecrets(specs?, env?, options?)` — Validates an explicit map, or the auto-registry if no map passed. Returns resolved `Record<string, string>`.
 - `useSecret(key, specs?)` — Reads a single secret. Accepts explicit map or falls back to auto-registry.
-- `enableAutoRegister()` — Opt-in: subsequent `defineSecrets` calls push to global map.
+- `enableAutoRegister()` — **Deprecated no-op.** Auto-registration is always on. Kept for backward compatibility.
 
 ### Two consumer styles
 
-**Auto-register (easy):** Call `enableAutoRegister()` first, then import your `secrets.ts` files, then `validateSecrets()` with no args.
-**Explicit spreading (structured):** Spread specs into `validateSecrets({ ...app, ...db })`. No global state, full control.
+**Auto-register (easy, default):** Import your `secrets.ts` files, then call `validateSecrets()` with no args. `defineSecrets` always registers globally.
+**Explicit spreading (structured):** Spread specs into `validateSecrets({ ...app, ...db })`. Full control over which specs are validated.
 
 The primary use case is **app developers** defining their own secrets in `secrets.ts` files. SDK/module authors can also ship secret definitions alongside their packages.
 
 ## Core library source files
 
 - `src/types.ts` — `SecretSpec`, `RegisteredSecret`, `ValidateOptions`
-- `src/registry.ts` — Global `Map`, `enableAutoRegister()`, `register()`, `clearRegistry()`
+- `src/registry.ts` — Global `Map`, `register()`, `clearRegistry()` (auto-registration always on; `enableAutoRegister()` is a deprecated no-op)
 - `src/caller.ts` — Stack trace parsing to extract caller file path
 - `src/resolve.ts` — Resolves a spec against env + environments
 - `src/validate.ts` — `validateSecrets()` with error/warn output
@@ -88,7 +87,7 @@ To add a new package: create `packages/@secretdef/<name>/index.ts` and `package.
 
 ## Key design decisions
 
-- `defineSecrets` returns pure data — no Proxy, no magic. Registration is opt-in via `enableAutoRegister()`.
+- `defineSecrets` returns pure data — no Proxy, no magic. Always auto-registers to global registry.
 - Production mode: missing required secrets → error table → `process.exit(1)`.
 - Non-production: missing secrets → warning table → server starts. Throws only on access via `useSecret`.
 - Error messages are structured for both humans and AI agents: include env var name, description, dashboard URL, registering file, current environment.

@@ -14,14 +14,13 @@ import {
   defineSecrets,
   validateSecrets,
   useSecret,
-  enableAutoRegister,
 } from "secretdef";
 import type { SecretSpec } from "secretdef";
 ```
 
 ### defineSecrets(specs)
 
-Declares secret requirements. Returns the same `Record<string, SecretSpec>` passed in. Pure data — no side effects unless `enableAutoRegister()` was called first.
+Declares secret requirements. Returns normalized `Record<string, SecretSpec>` and always auto-registers to the global registry.
 
 ```typescript
 import { defineSecrets } from "secretdef";
@@ -72,8 +71,7 @@ Two styles:
 **Auto-register (easy):**
 
 ```typescript
-import { enableAutoRegister, validateSecrets } from "secretdef";
-enableAutoRegister();
+import { validateSecrets } from "secretdef";
 import "./secrets";
 const env = validateSecrets();
 ```
@@ -101,9 +99,9 @@ import { useSecret } from "secretdef";
 const key = useSecret("STRIPE_SECRET_KEY");
 ```
 
-### enableAutoRegister()
+### enableAutoRegister() — DEPRECATED
 
-Call once at app entry, before imports. Every subsequent `defineSecrets()` call pushes specs to a global registry. Then `validateSecrets()` with no arguments checks them all.
+No-op kept for backward compatibility. Auto-registration is always on — every `defineSecrets()` call automatically registers to the global registry.
 
 ## Published definitions (@secretdef/\*)
 

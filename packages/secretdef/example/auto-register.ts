@@ -6,21 +6,17 @@
  * Try with/without env vars:
  *   API_KEY=my-key npx tsx example/auto-register.ts
  */
-import { enableAutoRegister, validateSecrets, useSecret } from 'secretdef';
+import { validateSecrets, useSecret } from 'secretdef';
 
-// 1. Enable auto-register before importing secret definitions
-enableAutoRegister();
-
-// 2. Import modules that call defineSecrets — they auto-register
-//    Using dynamic import because ESM hoists static imports above enableAutoRegister()
+// 1. Import modules that call defineSecrets — they auto-register
 await import('./secrets.js');
 
-// 3. Validate everything at once
+// 2. Validate everything at once
 const env = validateSecrets();
 
 console.log('Resolved secrets:', env);
 
-// 4. Access individual secrets later
+// 3. Access individual secrets later
 try {
   const dbUrl = useSecret('DATABASE_URL');
   console.log('DATABASE_URL:', dbUrl);

@@ -37,7 +37,7 @@ export function useSecret(
   if (!registered) {
     throw new Error(
       `secretdef: Unknown secret key "${key}". ` +
-        `It has not been registered via enableAutoRegister() + defineSecrets(). ` +
+        `It has not been registered via defineSecrets(). ` +
         `Either pass an explicit map to useSecret, or make sure the module that defines it has been imported.`
     );
   }

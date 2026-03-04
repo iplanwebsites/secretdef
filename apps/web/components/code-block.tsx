@@ -73,7 +73,7 @@ export function CodeBlock({ code, language = 'typescript', filename, className, 
           </button>
         </div>
       )}
-      <div className="p-4 overflow-x-auto text-sm leading-relaxed">
+      <div className="p-4 overflow-x-auto text-[13px] leading-relaxed">
         {highlightedHtml ? (
           <div
             className="[&_pre]:!bg-transparent [&_pre]:!p-0 [&_pre]:!m-0 [&_code]:!bg-transparent [&_.line-highlight-add]:bg-green-500/15 [&_.line-highlight-add]:border-l-2 [&_.line-highlight-add]:border-green-400 [&_.line-highlight-add]:pl-3 [&_.line-highlight-add]:-ml-3"

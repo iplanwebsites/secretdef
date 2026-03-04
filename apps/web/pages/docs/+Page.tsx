@@ -30,8 +30,7 @@ export const secrets = defineSecrets({
 });`;
 
 const autoRegisterCode = `// src/index.ts
-import { enableAutoRegister, validateSecrets } from 'secretdef';
-enableAutoRegister();
+import { validateSecrets } from 'secretdef';
 
 // Import your secrets files — each defineSecrets call auto-registers
 import './secrets';
@@ -316,9 +315,8 @@ export default function Page() {
             Auto-register <Badge variant="default" className="ml-2 text-[10px]">easy</Badge>
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            Call <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">enableAutoRegister()</code> once.
             Every <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">defineSecrets</code> call
-            automatically pushes its specs to a global registry. Then <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">validateSecrets()</code> with
+            automatically registers its specs to a global registry. Then <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">validateSecrets()</code> with
             no arguments checks them all.
           </p>
           <div className="mt-3">
@@ -466,9 +464,8 @@ export default function Page() {
               defineSecrets(specs)
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Declares secret requirements. Returns the same <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">Record&lt;string, SecretSpec&gt;</code> you
-              passed in. If <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">enableAutoRegister()</code> was
-              called first, also pushes specs to the global registry.
+              Declares secret requirements. Returns normalized <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">Record&lt;string, SecretSpec&gt;</code> and
+              always auto-registers to the global registry.
             </p>
           </div>
           <div>
@@ -494,11 +491,11 @@ export default function Page() {
           </div>
           <div>
             <h3 className="font-mono text-base font-semibold text-foreground">
-              enableAutoRegister()
+              enableAutoRegister() <span className="text-xs text-muted-foreground font-normal">deprecated</span>
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Opt-in. After calling this, every <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">defineSecrets</code> call
-              also pushes its specs to a global registry. Call once at the top of your app, before imports.
+              No-op kept for backward compatibility. Auto-registration is always on — every <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">defineSecrets</code> call
+              automatically registers to the global registry.
             </p>
           </div>
           <div>

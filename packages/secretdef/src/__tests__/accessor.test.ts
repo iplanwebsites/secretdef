@@ -61,7 +61,7 @@ describe('useSecret with auto-registry', () => {
 
   it('throws for unregistered key with helpful message', () => {
     expect(() => useSecret('UNKNOWN_KEY')).toThrowError(/Unknown secret key/);
-    expect(() => useSecret('UNKNOWN_KEY')).toThrowError(/enableAutoRegister/);
+    expect(() => useSecret('UNKNOWN_KEY')).toThrowError(/defineSecrets/);
   });
 
   it('throws SecretNotAvailableError for missing registered secret', () => {

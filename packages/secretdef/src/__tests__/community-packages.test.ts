@@ -1,4 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
+import { readdirSync } from 'fs';
+import { join } from 'path';
 import { clearRegistry } from '../registry.js';
 import type { SecretSpec } from '../types.js';
 
@@ -52,28 +54,12 @@ function assertValidSecrets(
 }
 
 describe('@secretdef/* community packages', () => {
-  // Import all packages and validate their structure
-  const packages = [
-    'anthropic',
-    'auth0',
-    'aws',
-    'clerk',
-    'firebase',
-    'gcp',
-    'mixpanel',
-    'neon',
-    'openai',
-    'paypal',
-    'planetscale',
-    'postmark',
-    'resend',
-    'segment',
-    'sendgrid',
-    'stripe',
-    'supabase',
-    'turso',
-    'twilio',
-  ];
+  // Dynamically discover packages from the filesystem
+  const packagesDir = join(__dirname, '..', '..', '..', '@secretdef');
+  const packages = readdirSync(packagesDir, { withFileTypes: true })
+    .filter((d) => d.isDirectory())
+    .map((d) => d.name)
+    .sort();
 
   for (const pkg of packages) {
     it(`@secretdef/${pkg} exports valid secret specs`, async () => {

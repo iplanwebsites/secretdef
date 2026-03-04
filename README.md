@@ -74,12 +74,11 @@ If you maintain an SDK or module, you can ship a `secrets.ts` alongside it so co
 
 #### The easy way: auto-register
 
-Call `enableAutoRegister()` once at the top of your app. Every `defineSecrets` call automatically registers its specs. Then `validateSecrets()` checks them all.
+Every `defineSecrets` call automatically registers its specs to a global registry. Then `validateSecrets()` checks them all.
 
 ```ts
 // src/index.ts
-import { enableAutoRegister, validateSecrets } from "secretdef";
-enableAutoRegister();
+import { validateSecrets } from "secretdef";
 
 import "./secrets"; // your app secrets
 import "./modules/db/secrets"; // module-level secrets
@@ -137,7 +136,7 @@ Server will start. These will throw if accessed at runtime.
 
 ### `useSecret(key, specs?)` — Read a single secret with structured errors
 
-### `enableAutoRegister()` — Opt-in: `defineSecrets` calls also push to global registry
+### `enableAutoRegister()` — Deprecated no-op (auto-registration is always on)
 
 ### `SecretSpec` — TypeScript type for secret definitions
 
