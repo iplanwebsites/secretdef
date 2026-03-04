@@ -7,17 +7,17 @@ import { Logo } from '../../components/logo';
 import { ArrowRight, Github, Package, Shield, Cpu, Blocks, Copy, Check } from 'lucide-react';
 import type { Data } from './+data';
 
-const agentPrompt = `Scan this codebase for all process.env usage. For each secret found:
+const agentPrompt = `Scan this codebase for all process.env usage. For each secret found, use defineSecrets() from "secretdef" to declare it — right in the file where it's used. Include:
+- envVar: the environment variable name
+- description: what it is, expected format/prefix, a dashboard URL to provision it
+- envOverrides: if dev/staging use different keys or have defaults
 
-1. Create a secrets.ts file next to the code that uses it
-2. Use defineSecrets() from "secretdef" with:
-   - envVar: the environment variable name
-   - description: what it is, the expected format/prefix, a dashboard URL to provision it, and common mistakes
-   - envOverrides: if dev/staging use different keys or have defaults
-3. Wire up validateSecrets() at the app entry point
-4. Replace direct process.env access with useSecret() where possible
+Use useSecret() to access values — it throws structured errors with the var name, description, and dashboard URL, so missing secrets are obvious to both humans and AI agents.
 
-Use "npm i secretdef" to install. See https://secretdef.com/docs for the full API.`;
+Wire up validateSecrets() at the app entry point to catch missing secrets at startup.
+
+Install: npm i secretdef
+Docs: https://secretdef.com/docs`;
 
 const defineCode = `// src/secrets.ts
 import { defineSecrets } from 'secretdef';
