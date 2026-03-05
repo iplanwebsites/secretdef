@@ -234,12 +234,16 @@ export default function Page() {
       </div>
 
       <h1 className="text-5xl font-extrabold tracking-tight text-foreground">
-        Ship faster with{' '}
-        <span className="text-primary">declarative secrets</span>
+        <span className="text-primary">@types</span> for your env vars
       </h1>
 
-      <p className="mt-4 text-lg text-muted-foreground max-w-2xl leading-relaxed">
-        Define what your app needs. Validate at startup. Get actionable errors instead of cryptic crashes.
+      <p className="mt-4 text-xl text-muted-foreground max-w-2xl leading-relaxed">
+        Ship faster. <span className="text-foreground font-medium">Stop debugging missing keys.</span>
+      </p>
+
+      <p className="mt-3 text-base text-muted-foreground max-w-2xl leading-relaxed">
+        Define required API keys, tokens, and connection strings — with context, descriptions and a nice dashboard UI.
+        Claude & Codex will keep on shipping.
       </p>
 
       <div className="mt-6">
@@ -355,28 +359,30 @@ export default function Page() {
 
       <p className="mt-4 text-sm text-muted-foreground italic">
         Not a vault. Not a secrets manager. Works alongside Doppler, Vault, Infisical, or plain .env files.
-        Zero dependencies. ~2KB.
+        A standard way for modules to declare what they need and where to get them. Zero dependencies. ~2KB.
       </p>
 
       {/* Personal story */}
       <div className="mt-12 mx-auto max-w-2xl rounded-xl border border-border bg-muted/30 px-8 py-6 text-center">
         <p className="text-lg font-semibold text-foreground">
-          I ship code 10x faster now. So I debug 10x more missing secrets.
+          I ship 10x faster now. So I spend 10x more time hunting missing keys.
         </p>
         <div className="mt-4 space-y-3 text-sm text-muted-foreground leading-relaxed">
           <p>
             AI agents write integrations in minutes. Stripe, Resend, a new database — done before lunch.
             But every deploy became the same loop: crash, check logs, guess which env var is missing,
-            find the right dashboard, provision the key, redeploy.
+            find the right dashboard, provision the key, redeploy. Again for staging. Again for the other project.
           </p>
           <p>
-            I tried <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">infra.md</code>,
+            I started documenting secrets in <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">infra.md</code>,
             then <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">CLAUDE.md</code>, then Notion.
             None of it was <em>there</em> when I needed it — in the terminal, at the moment of failure.
-            My agents couldn't read any of it.
+            My agents couldn't read any of it. And I kept forgetting on which account I provisioned what, where.
           </p>
           <p>
-            So I put the documentation <em>in the code</em>. One call at startup validates everything.
+            So I put the documentation <em>in the code</em>. A spec that says: this app needs{' '}
+            <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">STRIPE_SECRET_KEY</code>,
+            here's what it looks like, here's where to get it. One call at startup validates everything.
             The error message <em>is</em> the documentation — for me, for my agent, for the next person who touches this codebase.
           </p>
         </div>
