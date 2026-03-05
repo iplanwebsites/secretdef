@@ -14,7 +14,8 @@ validateSecrets(defineSecrets({
     group: 'api',
   },
   STRIPE_SECRET_KEY: {
-    description: 'Stripe API secret key — https://dashboard.stripe.com/apikeys',
+    description: 'Stripe API secret key',
+    dashboard: 'https://dashboard.stripe.com/apikeys',
     required: false,
     group: 'payments',
   },

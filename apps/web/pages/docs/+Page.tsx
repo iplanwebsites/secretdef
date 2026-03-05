@@ -11,12 +11,14 @@ import { defineSecrets } from 'secretdef';
 
 export const secrets = defineSecrets({
   DATABASE_URL: {
-    description: 'Postgres connection string — check your hosting dashboard',
+    description: 'Postgres connection string',
+    dashboard: 'https://console.neon.tech',
     validate: 'url',
     devDefault: 'postgresql://localhost:5432/myapp_dev',
   },
   STRIPE_SECRET_KEY: {
-    description: 'Stripe API secret key — https://dashboard.stripe.com/apikeys',
+    description: 'Stripe API secret key',
+    dashboard: 'https://dashboard.stripe.com/apikeys',
     example: 'sk_live_...',
     validate: 'str',
     environments: {
@@ -60,15 +62,16 @@ const key = useSecret('STRIPE_SECRET_KEY');   // throws with actionable error if
 const useSecretExplicitCode = `import { useSecret } from 'secretdef';
 import { secrets } from './secrets';
 
-// Pass an explicit map — no global registry needed
+// Pass an explicit map — full control over which specs are checked
 const key = useSecret('STRIPE_SECRET_KEY', secrets);`;
 
 const secretSpecCode = `// The object key IS the env var name
 type SecretSpec = {
-  description?: string;        // Human-readable — include a dashboard URL!
+  description?: string;        // Human-readable description of the secret
+  dashboard?: string;          // URL to the service dashboard/settings page
   required?: boolean;          // Default: true
   validate?: SecretValidation; // Built-in name or custom function
-  choices?: string[];          // Allowlist of valid values
+  choices?: readonly string[]; // Allowlist of valid values
   example?: string;            // Example value shown in errors
   devDefault?: string;         // Default for non-production environments
   group?: string;              // Group label in validation output
@@ -127,7 +130,8 @@ const builtinValidatorsCode = `// Built-in validators:
 
 const environmentsCode = `export const secrets = defineSecrets({
   STRIPE_SECRET_KEY: {
-    description: 'Stripe API secret key — https://dashboard.stripe.com/apikeys',
+    description: 'Stripe API secret key',
+    dashboard: 'https://dashboard.stripe.com/apikeys',
     example: 'sk_live_...',
     devDefault: 'sk_test_placeholder',   // shorthand for environments.development.default
   },
@@ -166,17 +170,17 @@ Run \`validateSecrets()\` at startup (see src/index.ts).
 Use \`useSecret('KEY')\` instead of \`process.env.KEY\`.
 
 If you see SecretNotAvailableError, read the error — it tells you
-the env var name, where to get it, and which file registered it.`;
+the env var name, where to get it, and which file defined it.`;
 
-const claudeMdErrorCode = `SecretNotAvailableError: STRIPE_SECRET_KEY is not available
+const claudeMdErrorCode = `SecretNotAvailable: STRIPE_SECRET_KEY is not configured.
 
-  env var:     STRIPE_SECRET_KEY
-  description: Stripe API secret key. Starts with sk_live_
-  dashboard:   https://dashboard.stripe.com/apikeys
-  registered:  src/secrets.ts
-  environment: development
+  Environment variable: STRIPE_SECRET_KEY
+  Description:          Stripe API secret key. Starts with sk_live_
+  Where to find it:     https://dashboard.stripe.com/apikeys
+  Defined in:           src/secrets.ts
+  Current environment:  development
 
-  → Set STRIPE_SECRET_KEY in .env or your hosting dashboard`;
+  To fix: set STRIPE_SECRET_KEY in your environment or .env file.`;
 
 const skillStructureCode = `# Install the skill via npx:
 npx skills add iplanwebsites/secretdef
@@ -246,6 +250,7 @@ export default function Page() {
           <li><a href="#comparison" className="hover:text-foreground transition-colors">Comparison with alternatives <span className="text-[10px] text-yellow-500 ml-1">experimental</span></a></li>
           <li><a href="#claude-md" className="hover:text-foreground transition-colors">CLAUDE.md integration</a></li>
           <li><a href="#claude-skill" className="hover:text-foreground transition-colors">Claude Code skill</a></li>
+          <li><a href="#dashboard-ui" className="hover:text-foreground transition-colors">Dashboard UI</a></li>
           <li><a href="#community-packages" className="hover:text-foreground transition-colors">Community packages</a></li>
         </ul>
       </nav>
@@ -297,7 +302,7 @@ export default function Page() {
         </div>
         <p className="mt-3 text-sm text-muted-foreground">
           <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">defineSecrets</code> returns
-          the same specs object as pure data. It does nothing at runtime unless auto-register is enabled.
+          the same specs object as pure data and always auto-registers to the global registry.
         </p>
       </section>
 
@@ -329,7 +334,7 @@ export default function Page() {
             Explicit spreading <Badge variant="outline" className="ml-2 text-[10px]">structured</Badge>
           </h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            For full control with no global state, spread each module's exports into a single call.
+            For full control over which specs are validated, spread each module's exports into a single call.
           </p>
           <div className="mt-3">
             <CodeBlock code={explicitCode} language="typescript" filename="src/env.ts" />
@@ -340,15 +345,22 @@ export default function Page() {
           <h3 className="text-lg font-semibold text-foreground">Validation behavior</h3>
           <div className="mt-3">
             <TerminalBlock>
-              <div className="text-red-400">{'🔴 Missing 2 secret(s) [env=production]:'}</div>
+              <div className="text-red-400">{'❌ 2 secret problems [env=production]:'}</div>
               <div className="text-gray-300 mt-2">
-                {'  ✗ STRIPE_SECRET_KEY'}<br />
-                {'    Stripe API secret key — https://dashboard.stripe.com/apikeys'}<br />
-                {'    registered by: src/secrets.ts'}<br />
+                {'  🔑 STRIPE_SECRET_KEY — missing'}<br />
+                {'     Stripe API secret key'}<br />
+                {'     dashboard: https://dashboard.stripe.com/apikeys'}<br />
+                {'     defined in: src/secrets.ts'}<br />
                 <br />
-                {'  ✗ DATABASE_URL'}<br />
-                {'    Postgres connection string'}<br />
-                {'    registered by: src/modules/db/secrets.ts'}
+                {'  🔑 DATABASE_URL — missing'}<br />
+                {'     Postgres connection string'}<br />
+                {'     dashboard: https://console.neon.tech'}<br />
+                {'     defined in: src/modules/db/secrets.ts'}
+              </div>
+              <div className="text-gray-400 mt-2">
+                {'  Add to your .env file:'}<br />
+                {'    STRIPE_SECRET_KEY='}<br />
+                {'    DATABASE_URL='}
               </div>
             </TerminalBlock>
           </div>
@@ -365,7 +377,7 @@ export default function Page() {
         <p className="mt-3 text-muted-foreground">
           A drop-in replacement for <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">process.env.KEY</code>.
           Returns the value or throws a structured error with the var name, description, dashboard URL,
-          and which file registered it.
+          and which file defined it.
         </p>
         <div className="mt-4">
           <CodeBlock code={useSecretCode} language="typescript" filename="src/modules/stripe/client.ts" />
@@ -485,7 +497,7 @@ export default function Page() {
             <p className="mt-1 text-sm text-muted-foreground">
               Reads a single secret. Returns the string value or throws
               a <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">SecretNotAvailableError</code> with
-              structured context (env var, description, URL, registering file).
+              structured context (env var, description, URL, defining file).
               Pass an explicit specs map or omit to use the auto-registry.
             </p>
           </div>
@@ -537,8 +549,9 @@ export default function Page() {
             </span>
           </li>
           <li>
-            <strong className="text-foreground">Always include a description with a URL.</strong>
+            <strong className="text-foreground">Always include a description and dashboard URL.</strong>
             <span className="text-sm text-muted-foreground ml-1">
+              Use the <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">dashboard</code> prop for the URL to the service settings page.
               Future you, your teammates, and AI agents will thank you.
               A dashboard link turns a 10-minute scavenger hunt into a single click.
             </span>
@@ -742,15 +755,15 @@ export default function Page() {
         </p>
         <div className="mt-3">
           <TerminalBlock>
-            <div className="text-red-400">{'SecretNotAvailableError: STRIPE_SECRET_KEY is not available'}</div>
+            <div className="text-red-400">{'SecretNotAvailable: STRIPE_SECRET_KEY is not configured.'}</div>
             <div className="text-gray-300 mt-2">
-              {'  env var:     STRIPE_SECRET_KEY'}<br />
-              {'  description: Stripe API secret key. Starts with sk_live_'}<br />
-              {'  dashboard:   https://dashboard.stripe.com/apikeys'}<br />
-              {'  registered:  src/secrets.ts'}<br />
-              {'  environment: development'}<br />
+              {'  Environment variable: STRIPE_SECRET_KEY'}<br />
+              {'  Description:          Stripe API secret key. Starts with sk_live_'}<br />
+              {'  Where to find it:     https://dashboard.stripe.com/apikeys'}<br />
+              {'  Defined in:           src/secrets.ts'}<br />
+              {'  Current environment:  development'}<br />
               <br />
-              {'  → Set STRIPE_SECRET_KEY in .env or your hosting dashboard'}
+              {'  To fix: set STRIPE_SECRET_KEY in your environment or .env file.'}
             </div>
           </TerminalBlock>
         </div>
@@ -781,7 +794,7 @@ export default function Page() {
         <p className="mt-3 text-sm text-muted-foreground">
           When Claude encounters a missing secret error, it reads the structured error output
           and knows exactly which env var to set, where to find the value, and which file
-          registered the requirement. The skill also helps Claude write good{' '}
+          defined the requirement. The skill also helps Claude write good{' '}
           <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">defineSecrets</code> calls
           with descriptive, actionable descriptions.
         </p>
@@ -789,6 +802,24 @@ export default function Page() {
           Follows the{' '}
           <a href="https://agentskills.io" className="text-primary hover:underline">Agent Skills</a>{' '}
           open standard — works with any AI tool that supports it.
+        </p>
+      </section>
+
+      {/* Dashboard UI */}
+      <section id="dashboard-ui" className="mt-12">
+        <h2 className="text-2xl font-bold text-foreground">Dashboard UI</h2>
+        <p className="mt-3 text-muted-foreground">
+          Visualize all your secrets in a local web dashboard. See which are configured,
+          which are missing, and jump straight to the service dashboard to provision them.
+        </p>
+        <div className="mt-4">
+          <CodeBlock code="npx secretdef ui" language="bash" filename="Terminal" />
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground">
+          The UI reads the <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">.secretdef/generated-*.json</code> snapshots
+          written by <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">validateSecrets()</code> in non-production environments.
+          It shows status, groups, values (masked), source files, and clickable{' '}
+          <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">dashboard</code> links for each secret.
         </p>
       </section>
 

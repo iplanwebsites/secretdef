@@ -28,7 +28,7 @@ describe('useSecret with explicit map', () => {
 
   it('throws SecretNotAvailableError for missing secret in explicit map', () => {
     const specs = defineSecrets({
-      NONEXISTENT_VAR_99999: { description: 'Test — https://example.com/keys' },
+      NONEXISTENT_VAR_99999: { description: 'Test key', dashboard: 'https://example.com/keys' },
     });
 
     try {
@@ -40,6 +40,7 @@ describe('useSecret with explicit map', () => {
       expect(e.secretKey).toBe('NONEXISTENT_VAR_99999');
       expect(e.envVar).toBe('NONEXISTENT_VAR_99999');
       expect(e.message).toContain('https://example.com/keys');
+      expect(e.message).toContain('Test key');
     }
   });
 });

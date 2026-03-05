@@ -17,7 +17,8 @@ export const secrets = defineSecrets({
     description: 'Your internal API key — ask #platform-eng on Slack',
   },
   ANALYTICS_KEY: {
-    description: 'Analytics write key — https://app.segment.com/settings/api-keys',
+    description: 'Analytics write key',
+    dashboard: 'https://app.segment.com/settings/api-keys',
     required: false,
   },
 });

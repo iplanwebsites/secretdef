@@ -17,7 +17,7 @@ The result:
 
 secretdef fixes this by putting secret requirements _in code_ — which secrets are needed, which env var to set, where to find the value, and how it differs per environment. One `validateSecrets()` call at startup checks everything and prints exactly what's missing and how to fix it.
 
-**For AI agents specifically:** instead of opaque runtime crashes, agents get structured errors with the env var name, a description, a URL to the dashboard, and the file that registered the requirement. That's enough to self-resolve the issue or give the developer a one-step fix.
+**For AI agents specifically:** instead of opaque runtime crashes, agents get structured errors with the env var name, a description, a URL to the dashboard, and the file that defined the requirement. That's enough to self-resolve the issue or give the developer a one-step fix.
 
 The core library is zero-dependency, ~2KB, and works with any secrets provider.
 
@@ -53,17 +53,19 @@ import { defineSecrets } from "secretdef";
 
 export const secrets = defineSecrets({
   STRIPE_SECRET_KEY: {
-    description: "Stripe API secret key — https://dashboard.stripe.com/apikeys",
+    description: "Stripe API secret key",
+    dashboard: "https://dashboard.stripe.com/apikeys",
     environments: {
       development: { envVar: "STRIPE_TEST_SECRET_KEY" },
     },
   },
   DATABASE_URL: {
-    description: "Postgres connection string — check your hosting dashboard",
+    description: "Postgres connection string",
+    dashboard: "https://console.neon.tech",
   },
   SENDGRID_API_KEY: {
-    description:
-      "SendGrid API key — https://app.sendgrid.com/settings/api_keys",
+    description: "SendGrid API key",
+    dashboard: "https://app.sendgrid.com/settings/api_keys",
   },
 });
 ```
@@ -88,7 +90,7 @@ const env = validateSecrets(); // checks everything that was registered
 
 #### The structured way: explicit spreading
 
-For full control, spread specs into a single `validateSecrets` call. No global state.
+For full control over which specs are validated, spread them into a single `validateSecrets` call.
 
 ```ts
 // src/env.ts
@@ -109,23 +111,30 @@ Both approaches produce the same result — a validated map of secret values.
 **In production** — missing secrets print an error table and exit:
 
 ```
-🔴 Missing 2 secret(s) [env=production]:
+❌ 2 secret problems [env=production]:
 
-  ✗ STRIPE_SECRET_KEY
-    Stripe API secret key — https://dashboard.stripe.com/apikeys
-    registered by: node_modules/@secretdef/stripe/index.ts
+  🔑 STRIPE_SECRET_KEY — missing
+     Stripe API secret key
+     dashboard: https://dashboard.stripe.com/apikeys
+     defined in: node_modules/@secretdef/stripe/index.ts
 
-  ✗ SENDGRID_API_KEY
-    SendGrid API key — https://app.sendgrid.com/settings/api_keys
-    registered by: node_modules/@secretdef/sendgrid/index.ts
+  🔑 SENDGRID_API_KEY — missing
+     SendGrid API key
+     dashboard: https://app.sendgrid.com/settings/api_keys
+     defined in: node_modules/@secretdef/sendgrid/index.ts
+
+  Add to your .env file:
+
+    STRIPE_SECRET_KEY=
+    SENDGRID_API_KEY=
 ```
 
 **In development** — missing secrets warn but don't block:
 
 ```
-⚠️  Missing 2 secret(s) [env=development]:
+⚠️  2 secret problems [env=development]:
   ...
-Server will start. These will throw if accessed at runtime.
+  Server will start, but missing secrets will throw if accessed at runtime.
 ```
 
 ## API
@@ -135,8 +144,6 @@ Server will start. These will throw if accessed at runtime.
 ### `validateSecrets(specs?, env?, options?)` — Validate a map or the auto-registry
 
 ### `useSecret(key, specs?)` — Read a single secret with structured errors
-
-### `enableAutoRegister()` — Deprecated no-op (auto-registration is always on)
 
 ### `SecretSpec` — TypeScript type for secret definitions
 
@@ -152,7 +159,7 @@ SecretNotAvailable: STRIPE_SECRET_KEY is not configured.
   Environment variable: STRIPE_SECRET_KEY
   Description:          Stripe API secret key
   Where to find it:     https://dashboard.stripe.com/apikeys
-  Registered by:        src/modules/stripe/config.ts
+  Defined in:           src/modules/stripe/config.ts
   Current environment:  development
 
   To fix: set STRIPE_SECRET_KEY in your environment or .env file.
@@ -160,7 +167,7 @@ SecretNotAvailable: STRIPE_SECRET_KEY is not configured.
 
 Compare that to: `TypeError: Cannot read properties of undefined (reading 'trim')`. One is self-resolving. The other starts a debugging session.
 
-This matters even more with AI coding agents — Cursor, Claude Code, Copilot all parse error output. A structured error with the var name, a dashboard URL, and the registering file gives them everything they need to help you fix it in one step.
+This matters even more with AI coding agents — Cursor, Claude Code, Copilot all parse error output. A structured error with the var name, a dashboard URL, and the defining file gives them everything they need to help you fix it in one step.
 
 ## Community `@secretdef/*` packages
 
@@ -178,6 +185,24 @@ Like `@types` for TypeScript, `@secretdef/*` packages provide ready-made secret 
 | Database  | `@secretdef/planetscale`, `@secretdef/neon`, `@secretdef/turso`                      |
 | Messaging | `@secretdef/twilio`                                                                  |
 | Analytics | `@secretdef/segment`, `@secretdef/mixpanel`                                          |
+
+## Dashboard UI (Experimental)
+
+View your secret definitions in a local web dashboard:
+
+```bash
+npx secretdef ui
+```
+
+In a monorepo, point to a specific package:
+
+```bash
+npx secretdef ui --cwd packages/api
+```
+
+Your app must call `validateSecrets()` at least once in development mode to generate the data file (`.secretdef/generated-*.json`). The file is written next to the closest `package.json` from your entry file, so each package in a monorepo gets its own `.secretdef/` directory. If you have multiple entry points, each gets its own snapshot file and appears as a tab in the dashboard.
+
+> **Note:** This feature is experimental and may change in future releases.
 
 ## Contributing
 

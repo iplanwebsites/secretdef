@@ -1,0 +1,8 @@
+{
+  "name": "@secretdef/livekit",
+  "version": "0.0.1",
+  "sideEffects": true,
+  "peerDependencies": {
+    "secretdef": ">=0.0.3"
+  }
+}

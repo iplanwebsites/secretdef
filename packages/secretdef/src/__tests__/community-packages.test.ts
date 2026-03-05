@@ -26,11 +26,14 @@ function assertValidSecrets(
     // description should be present
     expect(spec.description, `${name}.${key} should have description`).toBeTruthy();
 
-    // description should contain a URL
+    // description or dashboard should contain a URL
+    const hasUrl =
+      /https?:\/\//.test(spec.description || '') ||
+      /https?:\/\//.test(spec.dashboard || '');
     expect(
-      spec.description,
-      `${name}.${key}.description should contain a URL`,
-    ).toMatch(/https?:\/\//);
+      hasUrl,
+      `${name}.${key} should have a URL in description or dashboard`,
+    ).toBe(true);
 
     // If environments exists, it should be an object
     if (spec.environments) {

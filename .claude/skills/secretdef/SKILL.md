@@ -1,6 +1,6 @@
 ---
 name: secretdef
-description: Help users define, validate, and troubleshoot secret (env var) requirements using the secretdef library. Use when code imports secretdef, when errors mention SecretNotAvailableError, or when the user needs to add/fix environment variable declarations or secrets or env vars.
+description: Help users define, validate, and troubleshoot secret (env var) requirements using the secretdef library. Use when code imports secretdef, when errors mention SecretNotAvailableError, or when the user needs to add/fix environment variable declarations.
 ---
 
 # secretdef — Declare your secret dependencies
@@ -23,20 +23,19 @@ import type { SecretSpec } from "secretdef";
 Declares secret requirements. Returns normalized `Record<string, SecretSpec>` and always auto-registers to the global registry.
 
 ```typescript
-// src/secrets.ts
 import { defineSecrets } from "secretdef";
 
 export const secrets = defineSecrets({
   STRIPE_SECRET_KEY: {
-    description:
-      "Stripe API secret key. Starts with sk_live_ (not pk_). https://dashboard.stripe.com/apikeys",
+    description: "Stripe API secret key. Starts with sk_live_ (not pk_).",
+    dashboard: "https://dashboard.stripe.com/apikeys",
     environments: {
       development: { envVar: "STRIPE_TEST_SECRET_KEY" },
     },
   },
   DATABASE_URL: {
-    description:
-      "Postgres connection string — format: postgresql://user:pass@host/db",
+    description: "Postgres connection string — format: postgresql://user:pass@host/db",
+    dashboard: "https://console.neon.tech",
     environments: {
       development: { default: "postgresql://localhost:5432/myapp_dev" },
     },
@@ -48,8 +47,14 @@ export const secrets = defineSecrets({
 
 ```typescript
 type SecretSpec = {
-  description?: string; // Human-readable — include a dashboard URL!
+  description?: string; // Human-readable description
+  dashboard?: string; // URL to the service dashboard/settings page
   required?: boolean; // Default: true
+  validate?: 'str' | 'bool' | 'num' | 'email' | 'host' | 'port' | 'url' | 'json' | ((input: string) => unknown);
+  choices?: readonly string[]; // Allowlist of valid values
+  example?: string; // Example value shown in error output (e.g. "sk_live_...")
+  devDefault?: string; // Default value used when NODE_ENV is not 'production'
+  group?: string; // Group/tag for organizing secrets in output (e.g. "payments")
   environments?: {
     [env: string]: {
       envVar?: string; // Different env var name for this environment
@@ -77,7 +82,7 @@ import "./secrets";
 const env = validateSecrets();
 ```
 
-**Explicit spreading (no global state):**
+**Explicit spreading (full control):**
 
 ```typescript
 import { validateSecrets } from "secretdef";
@@ -91,7 +96,7 @@ Returns the secret value or throws `SecretNotAvailableError` with structured con
 
 - Env var name
 - Description (with URL extracted separately)
-- Registering file path
+- Defining file path
 - Current environment
 - Fix instructions
 
@@ -106,7 +111,7 @@ No-op kept for backward compatibility. Auto-registration is always on — every 
 
 ## Published definitions (@secretdef/\*)
 
-Pre-built definitions for popular services ship as `@secretdef/<service>` packages. Each exports `secrets`:
+Pre-built definitions for popular services ship as `@secretdef/<service>` packages:
 
 ```typescript
 import { secrets as stripe } from "@secretdef/stripe";
@@ -117,12 +122,11 @@ Available: stripe, paypal, auth0, clerk, supabase, firebase, sendgrid, resend, p
 
 ## Writing good descriptions
 
-Always include in the `description` field:
+Include in each secret definition:
 
-1. **What the key is** — e.g. "Stripe API secret key"
-2. **Format hint** — e.g. "Starts with sk*live* (not pk\_)"
-3. **Where to get it** — dashboard URL
-4. **Who can provision it** — e.g. "requires Admin role"
+1. **`description`** — What the key is, format hints (e.g. "Stripe API secret key. Starts with sk_live_.")
+2. **`dashboard`** — URL to the service dashboard where the key can be found/provisioned
+3. **Who can provision it** — e.g. mention "requires Admin role" in description
 
 ## When fixing SecretNotAvailableError
 
@@ -132,17 +136,3 @@ The error already tells you everything:
 2. Read the description and dashboard URL
 3. Set the env var in `.env`, CI secrets, or your hosting dashboard
 4. If in development, check `environments.development` for a different env var name or default
-
-## Project structure convention
-
-Define secrets next to the code that uses them:
-
-```
-src/
-  secrets.ts              # App-level secrets
-  modules/
-    db/secrets.ts         # Database secrets
-    stripe/secrets.ts     # Payment secrets
-```
-
-Collect at the top level with auto-register or explicit spreading.

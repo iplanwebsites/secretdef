@@ -9,6 +9,8 @@ export type SecretValidation = BuiltinValidator | CustomValidator;
 
 export interface SecretSpec {
   description?: string;
+  /** URL to the service dashboard where this secret can be found/managed */
+  dashboard?: string;
   required?: boolean;
   validate?: SecretValidation;
   /** Allowlist of valid values. Checked after validation (if any). */

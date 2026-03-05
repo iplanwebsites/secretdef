@@ -20,6 +20,62 @@ packages:
     hasEnvVars: true
     dateEvaluated: "2026-03-04"
 
+  - name: "@secretdef/google-genai"
+    title: Google Gemini
+    npm: "@google/generative-ai"
+    category: ai
+    repo: google-gemini/generative-ai-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/cohere"
+    title: Cohere
+    npm: cohere-ai
+    category: ai
+    repo: cohere-ai/cohere-typescript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/groq"
+    title: Groq
+    npm: groq-sdk
+    category: ai
+    repo: groq/groq-typescript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/mistral"
+    title: Mistral AI
+    npm: "@mistralai/mistralai"
+    category: ai
+    repo: mistralai/client-ts
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/replicate"
+    title: Replicate
+    npm: replicate
+    category: ai
+    repo: replicate/replicate-javascript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/huggingface"
+    title: Hugging Face
+    npm: "@huggingface/inference"
+    category: ai
+    repo: huggingface/huggingface.js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/pinecone"
+    title: Pinecone
+    npm: "@pinecone-database/pinecone"
+    category: ai
+    repo: pinecone-io/pinecone-ts-client
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
   # --- Payment ---
   - name: "@secretdef/stripe"
     title: Stripe
@@ -59,7 +115,7 @@ packages:
     npm: auth0
     category: auth
     repo: auth0/node-auth0
-    hasEnvVars: false
+    hasEnvVars: true
     dateEvaluated: "2026-03-04"
 
   # --- Email ---
@@ -84,7 +140,7 @@ packages:
     npm: postmark
     category: email
     repo: ActiveCampaign/postmark.js
-    hasEnvVars: false
+    hasEnvVars: true
     dateEvaluated: "2026-03-04"
 
   # --- Cloud ---
@@ -144,7 +200,7 @@ packages:
     npm: "@segment/analytics-node"
     category: analytics
     repo: segmentio/analytics-node
-    hasEnvVars: false
+    hasEnvVars: true
     dateEvaluated: "2026-03-04"
 
   - name: "@secretdef/mixpanel"
@@ -152,14 +208,1173 @@ packages:
     npm: mixpanel
     category: analytics
     repo: mixpanel/mixpanel-node
-    hasEnvVars: false
+    hasEnvVars: true
     dateEvaluated: "2026-03-04"
 
-  # --- Payment (no env vars) ---
+  # --- Search ---
+  - name: "@secretdef/algolia"
+    title: Algolia
+    npm: algoliasearch
+    category: search
+    repo: algolia/algoliasearch-client-javascript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Analytics ---
+  - name: "@secretdef/posthog"
+    title: PostHog
+    npm: posthog-node
+    category: analytics
+    repo: PostHog/posthog-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Monitoring ---
+  - name: "@secretdef/sentry"
+    title: Sentry
+    npm: "@sentry/node"
+    category: monitoring
+    repo: getsentry/sentry-javascript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Email ---
+  - name: "@secretdef/mailgun"
+    title: Mailgun
+    npm: mailgun.js
+    category: email
+    repo: mailgun/mailgun.js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Cloud ---
+  - name: "@secretdef/cloudflare"
+    title: Cloudflare
+    npm: cloudflare
+    category: cloud
+    repo: cloudflare/cloudflare-typescript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Database ---
+  - name: "@secretdef/mongodb"
+    title: MongoDB
+    npm: mongodb
+    category: database
+    repo: mongodb/node-mongodb-native
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/upstash-redis"
+    title: Upstash Redis
+    npm: "@upstash/redis"
+    category: database
+    repo: upstash/redis-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Storage ---
+  - name: "@secretdef/cloudinary"
+    title: Cloudinary
+    npm: cloudinary
+    category: storage
+    repo: cloudinary/cloudinary_npm
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Communication ---
+  - name: "@secretdef/slack"
+    title: Slack
+    npm: "@slack/web-api"
+    category: communication
+    repo: slackapi/node-slack-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/discord"
+    title: Discord
+    npm: discord.js
+    category: communication
+    repo: discordjs/discord.js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/pusher"
+    title: Pusher
+    npm: pusher
+    category: communication
+    repo: pusher/pusher-http-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- eCommerce ---
+  - name: "@secretdef/shopify"
+    title: Shopify
+    npm: "@shopify/shopify-api"
+    category: ecommerce
+    repo: Shopify/shopify-app-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- CRM/Productivity ---
+  - name: "@secretdef/hubspot"
+    title: HubSpot
+    npm: "@hubspot/api-client"
+    category: crm
+    repo: HubSpot/hubspot-api-nodejs
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/notion"
+    title: Notion
+    npm: "@notionhq/client"
+    category: crm
+    repo: makenotion/notion-sdk-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/linear"
+    title: Linear
+    npm: "@linear/sdk"
+    category: devtools
+    repo: linear/linear
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- CMS ---
+  - name: "@secretdef/contentful"
+    title: Contentful
+    npm: contentful
+    category: cms
+    repo: contentful/contentful.js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/sanity"
+    title: Sanity
+    npm: "@sanity/client"
+    category: cms
+    repo: sanity-io/client
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Feature Flags ---
+  - name: "@secretdef/launchdarkly"
+    title: LaunchDarkly
+    npm: launchdarkly-node-server-sdk
+    category: feature-flags
+    repo: launchdarkly/js-core
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Media ---
+  - name: "@secretdef/mux"
+    title: Mux
+    npm: "@mux/mux-node"
+    category: media
+    repo: muxinc/mux-node-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Monitoring ---
+  - name: "@secretdef/datadog"
+    title: Datadog
+    npm: dd-trace
+    category: monitoring
+    repo: DataDog/dd-trace-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Queues ---
+  - name: "@secretdef/inngest"
+    title: Inngest
+    npm: inngest
+    category: queues
+    repo: inngest/inngest-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Auth ---
+  - name: "@secretdef/workos"
+    title: WorkOS
+    npm: "@workos-inc/node"
+    category: auth
+    repo: workos/workos-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Maps ---
+  - name: "@secretdef/mapbox"
+    title: Mapbox
+    npm: "@mapbox/mapbox-sdk"
+    category: maps
+    repo: mapbox/mapbox-sdk-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Payments ---
+  - name: "@secretdef/square"
+    title: Square
+    npm: square
+    category: payment
+    repo: square/square-nodejs-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/plaid"
+    title: Plaid
+    npm: plaid
+    category: payment
+    repo: plaid/plaid-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/lemonsqueezy"
+    title: Lemon Squeezy
+    npm: "@lemonsqueezy/lemonsqueezy.js"
+    category: payment
+    repo: lmsqueezy/lemonsqueezy.js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Productivity ---
+  - name: "@secretdef/airtable"
+    title: Airtable
+    npm: airtable
+    category: productivity
+    repo: Airtable/airtable.js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Queues ---
+  - name: "@secretdef/trigger"
+    title: Trigger.dev
+    npm: "@trigger.dev/sdk"
+    category: queues
+    repo: triggerdotdev/trigger.dev
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Notifications ---
+  - name: "@secretdef/novu"
+    title: Novu
+    npm: "@novu/api"
+    category: notifications
+    repo: novuhq/novu
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/vonage"
+    title: Vonage
+    npm: "@vonage/server-sdk"
+    category: notifications
+    repo: Vonage/vonage-node-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Storage ---
+  - name: "@secretdef/uploadthing"
+    title: Uploadthing
+    npm: uploadthing
+    category: storage
+    repo: pingdotgg/uploadthing
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Database ---
+  - name: "@secretdef/convex"
+    title: Convex
+    npm: convex
+    category: database
+    repo: get-convex/convex-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- DevTools ---
+  - name: "@secretdef/github"
+    title: GitHub API
+    npm: "@octokit/rest"
+    category: devtools
+    repo: octokit/rest.js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Monitoring ---
+  - name: "@secretdef/axiom"
+    title: Axiom
+    npm: "@axiomhq/js"
+    category: monitoring
+    repo: axiomhq/axiom-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Communication ---
+  - name: "@secretdef/ably"
+    title: Ably
+    npm: ably
+    category: communication
+    repo: ably/ably-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/telegram"
+    title: Telegram
+    npm: telegraf
+    category: communication
+    repo: telegraf/telegraf
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Webhooks ---
+  - name: "@secretdef/svix"
+    title: Svix
+    npm: svix
+    category: webhooks
+    repo: svix/svix-webhooks
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Social ---
+  - name: "@secretdef/twitter"
+    title: Twitter / X
+    npm: twitter-api-v2
+    category: social
+    repo: PLhery/node-twitter-api-v2
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/spotify"
+    title: Spotify
+    npm: spotify-web-api-node
+    category: social
+    repo: thelinmichael/spotify-web-api-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Auth ---
+  - name: "@secretdef/stytch"
+    title: Stytch
+    npm: stytch
+    category: auth
+    repo: stytchauth/stytch-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Realtime ---
+  - name: "@secretdef/liveblocks"
+    title: Liveblocks
+    npm: "@liveblocks/node"
+    category: realtime
+    repo: liveblocks/liveblocks
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Analytics ---
+  - name: "@secretdef/amplitude"
+    title: Amplitude
+    npm: "@amplitude/analytics-node"
+    category: analytics
+    repo: amplitude/Amplitude-TypeScript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Email ---
+  - name: "@secretdef/brevo"
+    title: Brevo
+    npm: "@getbrevo/brevo"
+    category: email
+    repo: getbrevo/brevo-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Search ---
+  - name: "@secretdef/elasticsearch"
+    title: Elasticsearch
+    npm: "@elastic/elasticsearch"
+    category: search
+    repo: elastic/elasticsearch-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/typesense"
+    title: Typesense
+    npm: typesense
+    category: search
+    repo: typesense/typesense-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Feature Flags ---
+  - name: "@secretdef/growthbook"
+    title: GrowthBook
+    npm: "@growthbook/growthbook"
+    category: feature-flags
+    repo: growthbook/growthbook
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/statsig"
+    title: Statsig
+    npm: statsig-node
+    category: feature-flags
+    repo: statsig-io/node-js-server-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Payment ---
+  - name: "@secretdef/paddle"
+    title: Paddle
+    npm: "@paddle/paddle-node-sdk"
+    category: payment
+    repo: PaddleHQ/paddle-node-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/razorpay"
+    title: Razorpay
+    npm: razorpay
+    category: payment
+    repo: razorpay/razorpay-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Email ---
+  - name: "@secretdef/mailchimp"
+    title: Mailchimp
+    npm: "@mailchimp/mailchimp_marketing"
+    category: email
+    repo: mailchimp/mailchimp-marketing-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/klaviyo"
+    title: Klaviyo
+    npm: klaviyo-api
+    category: email
+    repo: klaviyo/klaviyo-api-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Auth ---
+  - name: "@secretdef/okta"
+    title: Okta
+    npm: "@okta/okta-sdk-nodejs"
+    category: auth
+    repo: okta/okta-sdk-nodejs
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Search ---
+  - name: "@secretdef/meilisearch"
+    title: Meilisearch
+    npm: meilisearch
+    category: search
+    repo: meilisearch/meilisearch-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Cloud ---
+  - name: "@secretdef/vercel"
+    title: Vercel
+    npm: vercel
+    category: cloud
+    repo: vercel/vercel
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Monitoring ---
+  - name: "@secretdef/logtail"
+    title: Logtail / Better Stack
+    npm: "@logtail/node"
+    category: monitoring
+    repo: logtail/logtail-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Feature Flags ---
+  - name: "@secretdef/flagsmith"
+    title: Flagsmith
+    npm: flagsmith-nodejs
+    category: feature-flags
+    repo: Flagsmith/flagsmith-nodejs-client
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- BaaS ---
+  - name: "@secretdef/appwrite"
+    title: Appwrite
+    npm: node-appwrite
+    category: baas
+    repo: appwrite/sdk-for-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Social ---
+  - name: "@secretdef/twitch"
+    title: Twitch
+    npm: "@twurple/api"
+    category: social
+    repo: twurple/twurple
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Secrets Management ---
+  - name: "@secretdef/doppler"
+    title: Doppler
+    npm: doppler-sdk
+    category: secrets
+    repo: DopplerHQ/node-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Productivity ---
+  - name: "@secretdef/jira"
+    title: Jira
+    npm: jira-client
+    category: productivity
+    repo: jira-node/node-jira-client
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/confluence"
+    title: Confluence
+    npm: confluence-api
+    category: productivity
+    repo: johnpaulvaughan/confluence-api
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Support ---
+  - name: "@secretdef/zendesk"
+    title: Zendesk
+    npm: node-zendesk
+    category: support
+    repo: blakmatrix/node-zendesk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/intercom"
+    title: Intercom
+    npm: intercom-client
+    category: support
+    repo: intercom/intercom-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Monitoring ---
+  - name: "@secretdef/pagerduty"
+    title: PagerDuty
+    npm: "@pagerduty/pdjs"
+    category: monitoring
+    repo: PagerDuty/pdjs
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/newrelic"
+    title: New Relic
+    npm: newrelic
+    category: monitoring
+    repo: newrelic/node-newrelic
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/grafana"
+    title: Grafana
+    npm: grafana-api
+    category: monitoring
+    repo: grafana/grafana
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Database ---
+  - name: "@secretdef/redis"
+    title: Redis
+    npm: redis
+    category: database
+    repo: redis/node-redis
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- CI/CD ---
+  - name: "@secretdef/circleci"
+    title: CircleCI
+    npm: circleci
+    category: cicd
+    repo: CircleCI-Public/circleci-cli
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Security ---
+  - name: "@secretdef/snyk"
+    title: Snyk
+    npm: snyk
+    category: security
+    repo: snyk/snyk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/sonarqube"
+    title: SonarQube
+    npm: sonarqube-scanner
+    category: security
+    repo: SonarSource/sonarqube
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Secrets Management ---
+  - name: "@secretdef/vault"
+    title: HashiCorp Vault
+    npm: node-vault
+    category: secrets
+    repo: hashicorp/vault
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Monitoring ---
+  - name: "@secretdef/dynatrace"
+    title: Dynatrace
+    npm: "@dynatrace/oneagent-sdk"
+    category: monitoring
+    repo: Dynatrace/OneAgent-SDK-for-NodeJs
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/elastic-apm"
+    title: Elastic APM
+    npm: elastic-apm-node
+    category: monitoring
+    repo: elastic/apm-agent-nodejs
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Support ---
+  - name: "@secretdef/freshdesk"
+    title: Freshdesk
+    npm: freshdesk-api
+    category: support
+    repo: arjunkomath/node-freshdesk-api
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Payment ---
+  - name: "@secretdef/braintree"
+    title: Braintree
+    npm: braintree
+    category: payment
+    repo: braintree/braintree_node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- DevTools ---
+  - name: "@secretdef/gitlab"
+    title: GitLab
+    npm: "@gitbeaker/rest"
+    category: devtools
+    repo: jdalrymple/gitbeaker
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/bitbucket"
+    title: Bitbucket
+    npm: bitbucket
+    category: devtools
+    repo: MunifTanjim/node-bitbucket
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- CRM ---
+  - name: "@secretdef/salesforce"
+    title: Salesforce
+    npm: jsforce
+    category: crm
+    repo: jsforce/jsforce
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Observability ---
+  - name: "@secretdef/opentelemetry"
+    title: OpenTelemetry
+    npm: "@opentelemetry/sdk-node"
+    category: observability
+    repo: open-telemetry/opentelemetry-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Notifications ---
+  - name: "@secretdef/courier"
+    title: Courier
+    npm: "@trycourier/courier"
+    category: notifications
+    repo: trycourier/courier-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/knock"
+    title: Knock
+    npm: "@knocklabs/node"
+    category: notifications
+    repo: knocklabs/knock-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Database ---
+  - name: "@secretdef/deno-kv"
+    title: Deno KV
+    npm: deno-kv
+    category: database
+    repo: denoland/deno
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/fauna"
+    title: Fauna
+    npm: fauna
+    category: database
+    repo: fauna/fauna-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/cockroachdb"
+    title: CockroachDB
+    npm: pg
+    category: database
+    repo: cockroachdb/cockroach
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Communication ---
+  - name: "@secretdef/telnyx"
+    title: Telnyx
+    npm: telnyx
+    category: communication
+    repo: team-telnyx/telnyx-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- CMS ---
+  - name: "@secretdef/contentstack"
+    title: Contentstack
+    npm: contentstack
+    category: cms
+    repo: contentstack/contentstack-javascript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # --- Payment ---
   - name: "@secretdef/paypal"
     title: PayPal
-    npm: paypal-rest-sdk
+    npm: "@paypal/paypal-server-sdk"
     category: payment
-    repo: paypal/paypal-checkout-components
-    hasEnvVars: false
+    repo: paypal/paypal-rest-api-nodejs
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # ===== Batch 11: AI/LLM + Voice + Speech =====
+
+  - name: "@secretdef/together-ai"
+    title: Together AI
+    npm: together-ai
+    category: ai
+    repo: togethercomputer/together-python
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/fireworks-ai"
+    title: Fireworks AI
+    npm: "@fireworks-ai/inference"
+    category: ai
+    repo: fireworks-ai/fireworks-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/openrouter"
+    title: OpenRouter
+    npm: openrouter
+    category: ai
+    repo: openrouter/openrouter
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/deepseek"
+    title: DeepSeek
+    npm: deepseek
+    category: ai
+    repo: deepseek-ai/deepseek-coder
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/perplexity"
+    title: Perplexity AI
+    npm: perplexity
+    category: ai
+    repo: perplexity-ai/pplx
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/xai"
+    title: xAI (Grok)
+    npm: "@ai-sdk/xai"
+    category: ai
+    repo: x-ai/grok
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/elevenlabs"
+    title: ElevenLabs
+    npm: elevenlabs
+    category: ai
+    repo: elevenlabs/elevenlabs-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/deepgram"
+    title: Deepgram
+    npm: "@deepgram/sdk"
+    category: ai
+    repo: deepgram/deepgram-js-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/assemblyai"
+    title: AssemblyAI
+    npm: assemblyai
+    category: ai
+    repo: AssemblyAI/assemblyai-node-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/weaviate"
+    title: Weaviate
+    npm: weaviate-client
+    category: vector-db
+    repo: weaviate/typescript-client
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # ===== Batch 12: Vector DBs + Payments + Tools =====
+
+  - name: "@secretdef/qdrant"
+    title: Qdrant
+    npm: "@qdrant/js-client-rest"
+    category: vector-db
+    repo: qdrant/qdrant-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/chroma"
+    title: Chroma
+    npm: chromadb
+    category: vector-db
+    repo: chroma-core/chroma
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/livekit"
+    title: LiveKit
+    npm: livekit-server-sdk
+    category: communication
+    repo: livekit/server-sdk-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/stream"
+    title: Stream
+    npm: stream-chat
+    category: communication
+    repo: GetStream/stream-chat-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/chargebee"
+    title: Chargebee
+    npm: chargebee
+    category: payment
+    repo: chargebee/chargebee-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/adyen"
+    title: Adyen
+    npm: "@adyen/api-library"
+    category: payment
+    repo: Adyen/adyen-node-api-library
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/firecrawl"
+    title: Firecrawl
+    npm: "@mendable/firecrawl-js"
+    category: scraping
+    repo: mendableai/firecrawl
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/e2b"
+    title: E2B
+    npm: e2b
+    category: ai
+    repo: e2b-dev/e2b
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/arcjet"
+    title: Arcjet
+    npm: arcjet
+    category: security
+    repo: arcjet/arcjet-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/deepl"
+    title: DeepL
+    npm: deepl-node
+    category: translation
+    repo: DeepLcom/deepl-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # ===== Batch 13 =====
+
+  - name: "@secretdef/honeycomb"
+    title: Honeycomb
+    npm: "@honeycombio/opentelemetry-node"
+    category: observability
+    repo: honeycombio/honeycomb-opentelemetry-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/rollbar"
+    title: Rollbar
+    npm: rollbar
+    category: monitoring
+    repo: rollbar/rollbar.js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/bugsnag"
+    title: Bugsnag
+    npm: "@bugsnag/js"
+    category: monitoring
+    repo: bugsnag/bugsnag-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/onesignal"
+    title: OneSignal
+    npm: "@onesignal/node-onesignal"
+    category: notifications
+    repo: OneSignal/onesignal-node-api
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/storyblok"
+    title: Storyblok
+    npm: "@storyblok/js"
+    category: cms
+    repo: storyblok/storyblok-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/prismic"
+    title: Prismic
+    npm: "@prismicio/client"
+    category: cms
+    repo: prismicio/prismic-client
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/netlify"
+    title: Netlify
+    npm: netlify
+    category: cloud
+    repo: netlify/js-client
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/railway"
+    title: Railway
+    npm: railway
+    category: cloud
+    repo: railwayapp/cli
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/temporal"
+    title: Temporal
+    npm: "@temporalio/client"
+    category: queues
+    repo: temporalio/sdk-typescript
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/qstash"
+    title: Upstash QStash
+    npm: "@upstash/qstash"
+    category: queues
+    repo: upstash/sdk-qstash-ts
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # ===== Batch 14 =====
+
+  - name: "@secretdef/imagekit"
+    title: ImageKit
+    npm: imagekit
+    category: storage
+    repo: imagekit-developer/imagekit-nodejs
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/directus"
+    title: Directus
+    npm: "@directus/sdk"
+    category: cms
+    repo: directus/directus
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/hygraph"
+    title: Hygraph
+    npm: hygraph
+    category: cms
+    repo: hygraph/hygraph
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/stabilityai"
+    title: Stability AI
+    npm: stability-ai
+    category: ai
+    repo: Stability-AI/stability-sdk
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/fal-ai"
+    title: fal.ai
+    npm: "@fal-ai/client"
+    category: ai
+    repo: fal-ai/fal-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/unleash"
+    title: Unleash
+    npm: unleash-client
+    category: feature-flags
+    repo: Unleash/unleash-client-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/hookdeck"
+    title: Hookdeck
+    npm: "@hookdeck/sdk"
+    category: webhooks
+    repo: hookdeck/hookdeck-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/splunk"
+    title: Splunk
+    npm: splunk-logging
+    category: monitoring
+    repo: splunk/splunk-javascript-logging
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/plivo"
+    title: Plivo
+    npm: plivo
+    category: communication
+    repo: plivo/plivo-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/infisical"
+    title: Infisical
+    npm: "@infisical/sdk"
+    category: secrets
+    repo: Infisical/infisical
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  # ===== Batch 15 =====
+
+  - name: "@secretdef/kinde"
+    title: Kinde
+    npm: "@kinde-oss/kinde-node"
+    category: auth
+    repo: kinde-oss/kinde-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/azure-openai"
+    title: Azure OpenAI
+    npm: openai
+    category: ai
+    repo: openai/openai-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/voyage-ai"
+    title: Voyage AI
+    npm: voyageai
+    category: ai
+    repo: voyage-ai/voyageai-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/ipinfo"
+    title: IPinfo
+    npm: node-ipinfo
+    category: geolocation
+    repo: ipinfo/node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/apify"
+    title: Apify
+    npm: apify-client
+    category: scraping
+    repo: apify/apify-client-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/loops"
+    title: Loops
+    npm: loops
+    category: email
+    repo: loops-so/loops-js
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/hcaptcha"
+    title: hCaptcha
+    npm: hcaptcha
+    category: security
+    repo: hCaptcha/hcaptcha-node
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/turnstile"
+    title: Cloudflare Turnstile
+    npm: turnstile
+    category: security
+    repo: cloudflare/turnstile
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/recaptcha"
+    title: Google reCAPTCHA
+    npm: recaptcha
+    category: security
+    repo: google/recaptcha
+    hasEnvVars: true
+    dateEvaluated: "2026-03-04"
+
+  - name: "@secretdef/agora"
+    title: Agora
+    npm: agora-access-token
+    category: communication
+    repo: AgoraIO/Tools
+    hasEnvVars: true
     dateEvaluated: "2026-03-04"

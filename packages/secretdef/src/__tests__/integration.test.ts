@@ -26,7 +26,7 @@ describe('Style A: explicit spread', () => {
 
     expect(warnSpy).toHaveBeenCalled();
     const output = warnSpy.mock.calls[0][0];
-    expect(output).toContain('2 secret problem(s)');
+    expect(output).toContain('2 secret problems');
     expect(output).toContain('STRIPE_SECRET_KEY');
     expect(output).toContain('SENDGRID_API_KEY');
   });
@@ -68,7 +68,7 @@ describe('Style B: auto-register', () => {
     validateSecrets(undefined, 'development');
 
     const output = warnSpy.mock.calls[0][0];
-    expect(output).toContain('2 secret problem(s)');
+    expect(output).toContain('2 secret problems');
   });
 
   it('uses environments override correctly during validation', () => {

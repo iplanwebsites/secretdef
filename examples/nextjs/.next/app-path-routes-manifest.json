@@ -1,5 +1,5 @@
 {
   "/_not-found/page": "/_not-found",
-  "/api/secret/route": "/api/secret",
-  "/page": "/"
+  "/page": "/",
+  "/api/secret/route": "/api/secret"
 }

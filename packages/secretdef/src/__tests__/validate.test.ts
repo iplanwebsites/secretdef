@@ -31,7 +31,7 @@ describe('validateSecrets with explicit map', () => {
 
     expect(warnSpy).toHaveBeenCalled();
     const output = warnSpy.mock.calls[0][0];
-    expect(output).toContain('1 secret problem(s)');
+    expect(output).toContain('1 secret problem');
     expect(output).toContain('NONEXISTENT_VAR_12345');
   });
 
@@ -108,7 +108,7 @@ describe('validateSecrets with spread pattern', () => {
     validateSecrets({ ...stripe, ...sendgrid }, 'development');
 
     const output = warnSpy.mock.calls[0][0];
-    expect(output).toContain('2 secret problem(s)');
+    expect(output).toContain('2 secret problems');
     expect(output).toContain('NONEXISTENT_STRIPE');
     expect(output).toContain('NONEXISTENT_SENDGRID');
   });

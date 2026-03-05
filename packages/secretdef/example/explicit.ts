@@ -1,5 +1,5 @@
 /**
- * Example: Explicit spreading style (no global state)
+ * Example: Explicit spreading style (full control)
  *
  * Run: npx tsx example/explicit.ts
  *
@@ -14,7 +14,7 @@ const env = validateSecrets({ ...app });
 
 console.log('Resolved secrets:', env);
 
-// Access with explicit map — no global registry needed
+// Access with explicit map — full control over which specs are checked
 try {
   const dbUrl = useSecret('DATABASE_URL', app);
   console.log('DATABASE_URL:', dbUrl);

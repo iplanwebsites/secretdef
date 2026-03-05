@@ -1,0 +1,8 @@
+{
+  "name": "@secretdef/arcjet",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "secretdef": ">=0.0.3"
+  },
+  "sideEffects": true
+}

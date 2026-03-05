@@ -73,7 +73,7 @@ export class SecretValidationError extends Error {
       lines.push(`  Example:              ${spec.example}`);
     }
     if (registeredBy) {
-      lines.push(`  Registered by:        ${registeredBy}`);
+      lines.push(`  Defined in:           ${registeredBy}`);
     }
     lines.push(`  Current environment:  ${env}`);
     lines.push('');
@@ -103,23 +103,30 @@ export class SecretNotAvailableError extends Error {
     ];
 
     if (spec.description) {
-      const urlMatch = spec.description.match(/https?:\/\/\S+/);
-      if (urlMatch) {
-        const descWithoutUrl = spec.description.replace(urlMatch[0], '').replace(/\s*—\s*$/, '').trim();
-        if (descWithoutUrl) {
-          lines.push(`  Description:          ${descWithoutUrl}`);
-        }
-        lines.push(`  Where to find it:     ${urlMatch[0]}`);
-      } else {
+      if (spec.dashboard) {
         lines.push(`  Description:          ${spec.description}`);
+        lines.push(`  Where to find it:     ${spec.dashboard}`);
+      } else {
+        const urlMatch = spec.description.match(/https?:\/\/\S+/);
+        if (urlMatch) {
+          const descWithoutUrl = spec.description.replace(urlMatch[0], '').replace(/\s*—\s*$/, '').trim();
+          if (descWithoutUrl) {
+            lines.push(`  Description:          ${descWithoutUrl}`);
+          }
+          lines.push(`  Where to find it:     ${urlMatch[0]}`);
+        } else {
+          lines.push(`  Description:          ${spec.description}`);
+        }
       }
+    } else if (spec.dashboard) {
+      lines.push(`  Where to find it:     ${spec.dashboard}`);
     }
 
     if (spec.example) {
       lines.push(`  Example:              ${spec.example}`);
     }
     if (registeredBy) {
-      lines.push(`  Registered by:        ${registeredBy}`);
+      lines.push(`  Defined in:           ${registeredBy}`);
     }
     lines.push(`  Current environment:  ${env}`);
     lines.push('');

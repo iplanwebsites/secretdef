@@ -47,12 +47,17 @@ pnpm --filter secretdef-example-express dev:missing
 secretdef prints a warning table but the server still starts:
 
 ```
-⚠️  1 secret problem(s) [env=development]:
+⚠️  1 secret problem [env=development]:
 
-  ⚠ DATABASE_URL — missing
-    Database connection string — https://example.com/db
+  🔑 DATABASE_URL — missing
+     Database connection string
+     dashboard: https://example.com/db
 
-Server will start. These will throw if accessed at runtime.
+  Server will start, but missing secrets will throw if accessed at runtime.
+
+  Add to your .env file:
+
+    DATABASE_URL=
 
 Express example running on http://localhost:3100
 ```
@@ -70,13 +75,20 @@ pnpm --filter secretdef-example-express dev:production
 secretdef prints an error table and exits with code 1:
 
 ```
-🔴 2 secret problem(s) [env=production]:
+❌ 2 secret problems [env=production]:
 
-  ✗ API_KEY — missing
-    Main API key — https://example.com/settings
+  🔑 API_KEY — missing
+     Main API key
+     dashboard: https://example.com/settings
 
-  ✗ DATABASE_URL — missing
-    Database connection string — https://example.com/db
+  🔑 DATABASE_URL — missing
+     Database connection string
+     dashboard: https://example.com/db
+
+  Add to your .env file:
+
+    API_KEY=
+    DATABASE_URL=
 ```
 
 Dev defaults don't apply in production, so both secrets are required.
@@ -102,6 +114,7 @@ SecretNotAvailable: DATABASE_URL is not configured.
   Environment variable: DATABASE_URL
   Description:          Database connection string
   Where to find it:     https://example.com/db
+  Defined in:           src/secrets.ts
   Current environment:  development
 
   To fix: set DATABASE_URL in your environment or .env file.

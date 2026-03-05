@@ -1,11 +1,12 @@
 import { useState, useRef } from 'react';
 import { useData } from 'vike-react/useData';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import { CodeBlock, TerminalBlock, InstallCommand, fireConfettiFromElement } from '../../components/code-block';
 import { Logo } from '../../components/logo';
-import { ArrowRight, Github, Package, Shield, Cpu, Blocks, Copy, Check, UserPlus } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/card';
+import { ArrowRight, Github, Package, Shield, Cpu, Blocks, Copy, Check, UserPlus, Monitor } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { UiPreview } from '../../components/ui-preview';
 import type { Data } from './+data';
 
 const agentPrompt = `Scan this codebase for all process.env usage. For each secret found, use defineSecrets() from "secretdef" to declare it — right in the file where it's used. The object key IS the env var name. Include:
@@ -23,16 +24,13 @@ Docs: https://secretdef.com/docs`;
 
 const defineCode = `// src/secrets.ts
 import { defineSecrets } from 'secretdef';
+import { secrets as openai } from '@secretdef/openai';
 
 export const secrets = defineSecrets({
-  STRIPE_SECRET_KEY: {
-    description: 'Stripe API secret key — https://dashboard.stripe.com/apikeys',
-    example: 'sk_live_...',
-    validate: 'str',
-    devDefault: 'sk_test_placeholder',
-  },
+  ...openai,
   DATABASE_URL: {
-    description: 'Postgres connection string — format: postgresql://user:pass@host/db',
+    description: 'Postgres connection string',
+    dashboard: 'https://console.neon.tech',
     validate: 'url',
     devDefault: 'postgresql://localhost:5432/myapp_dev',
   },
@@ -65,7 +63,9 @@ const key = useSecret('STRIPE_SECRET_KEY');
 //     Environment variable: STRIPE_SECRET_KEY
 //     Description:          Stripe API secret key
 //     Where to find it:     https://dashboard.stripe.com/apikeys
-//     To fix: set STRIPE_SECRET_KEY in your .env file.
+//     Defined in:           src/secrets.ts
+//     Current environment:  development
+//     To fix: set STRIPE_SECRET_KEY in your environment or .env file.
 //
 // vs: TypeError: Cannot read properties of undefined`;
 
@@ -76,30 +76,13 @@ import '@secretdef/openai';
 // import '@secretdef/stripe';
 // import '@secretdef/resend';
 
-// Validates ALL secrets registered by the imports above
+// Validates ALL secrets defined by the imports above
 validateSecrets();`;
 
 const sdkExamples = {
-  resend: {
-    label: 'Resend',
-    subtitle: 'Just import — zero config',
-    code: `import { Resend } from 'resend';
-import '@secretdef/resend';
-
-// That's it. validateSecrets() at your entry point
-// catches missing RESEND_API_KEY at startup.
-const resend = new Resend(process.env.RESEND_API_KEY);`,
-    highlightLines: [2],
-    terminal: {
-      error: '🔴 Missing 1 secret(s) [env=production]:',
-      details: `  ✗ RESEND_API_KEY
-    Email notifications service — https://resend.com/api-keys
-    from: @secretdef/resend`,
-    },
-  },
   openai: {
     label: 'OpenAI',
-    subtitle: 'Validated reads with useSecret()',
+    subtitle: 'Just import + useSecret()',
     code: `import OpenAI from 'openai';
 import { useSecret } from 'secretdef';
 import '@secretdef/openai';
@@ -108,10 +91,29 @@ import '@secretdef/openai';
 const openai = new OpenAI({ apiKey: useSecret('OPENAI_API_KEY') });`,
     highlightLines: [2, 3, 6],
     terminal: {
-      error: '🔴 Missing 1 secret(s) [env=production]:',
-      details: `  ✗ OPENAI_API_KEY
-    LLM inference provider — https://platform.openai.com/api-keys
-    from: @secretdef/openai`,
+      error: '❌ 1 secret problem [env=production]:',
+      details: `  🔑 OPENAI_API_KEY — missing
+     OpenAI API key
+     dashboard: https://platform.openai.com/api-keys
+     defined in: @secretdef/openai`,
+    },
+  },
+  resend: {
+    label: 'Resend',
+    subtitle: 'Zero-config import',
+    code: `import { Resend } from 'resend';
+import '@secretdef/resend';
+
+// That's it. validateSecrets() at your entry point
+// catches missing RESEND_API_KEY at startup.
+const resend = new Resend(process.env.RESEND_API_KEY);`,
+    highlightLines: [2],
+    terminal: {
+      error: '❌ 1 secret problem [env=production]:',
+      details: `  🔑 RESEND_API_KEY — missing
+     Resend API key
+     dashboard: https://resend.com/api-keys
+     defined in: @secretdef/resend`,
     },
   },
   stripe: {
@@ -125,44 +127,24 @@ const env = validateSecrets({
   ...stripe,
   ...defineSecrets({
     STRIPE_WEBHOOK_SECRET: {
-      description: 'Order fulfillment webhook — https://dashboard.stripe.com/webhooks',
+      description: 'Order fulfillment webhook',
+      dashboard: 'https://dashboard.stripe.com/webhooks',
     },
   }),
 });
 const client = new Stripe(env.STRIPE_SECRET_KEY);`,
-    highlightLines: [2, 3, 5, 6, 7, 8, 9, 10, 11],
+    highlightLines: [2, 3, 5, 6, 7, 8, 9, 10, 11, 12],
     terminal: {
-      error: '🔴 Missing 2 secret(s) [env=production]:',
-      details: `  ✗ STRIPE_SECRET_KEY
-    Merch store payment account — https://dashboard.stripe.com/apikeys
-    from: @secretdef/stripe
+      error: '❌ 2 secret problems [env=production]:',
+      details: `  🔑 STRIPE_SECRET_KEY — missing
+     Stripe API secret key
+     dashboard: https://dashboard.stripe.com/apikeys
+     defined in: @secretdef/stripe
 
-  ✗ STRIPE_WEBHOOK_SECRET
-    Order fulfillment webhook — https://dashboard.stripe.com/webhooks
-    from: server.ts`,
-    },
-  },
-  anthropic: {
-    label: 'Anthropic',
-    subtitle: 'Multiple packages, one validateSecrets()',
-    code: `import Anthropic from '@anthropic-ai/sdk';
-import { validateSecrets } from 'secretdef';
-import '@secretdef/anthropic';
-import '@secretdef/resend';
-
-// One call validates secrets from ALL imported packages
-const env = validateSecrets();
-const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });`,
-    highlightLines: [2, 3, 4, 7],
-    terminal: {
-      error: '🔴 Missing 2 secret(s) [env=production]:',
-      details: `  ✗ ANTHROPIC_API_KEY
-    AI assistant backend — https://console.anthropic.com/settings/keys
-    from: @secretdef/anthropic
-
-  ✗ RESEND_API_KEY
-    Email notifications service — https://resend.com/api-keys
-    from: @secretdef/resend`,
+  🔑 STRIPE_WEBHOOK_SECRET — missing
+     Order fulfillment webhook
+     dashboard: https://dashboard.stripe.com/webhooks
+     defined in: server.ts`,
     },
   },
   database: {
@@ -172,19 +154,25 @@ const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY });`,
 
 const env = validateSecrets(defineSecrets({
   DATABASE_URL: {
-    description: 'Postgres connection — https://console.neon.tech',
+    description: 'Postgres connection string',
+    dashboard: 'https://console.neon.tech',
     validate: 'url',
     devDefault: 'postgresql://localhost:5432/myapp_dev',
   },
-}));`,
-    highlightLines: [1, 3, 4, 5, 6, 7, 8],
+}));
+// In development: DATABASE_URL resolves to devDefault — no warning.
+// In production: devDefault doesn't apply — must set the real value.`,
+    highlightLines: [1, 3, 4, 5, 6, 7, 8, 9],
     terminal: {
-      isWarning: true,
-      error: '⚠️  1 secret(s) using devDefault [env=development]:',
-      details: `  ⚠ DATABASE_URL — using devDefault
-    → postgresql://localhost:5432/myapp_dev
-    Postgres connection — https://console.neon.tech
-    from: src/secrets.ts`,
+      error: '❌ 1 secret problem [env=production]:',
+      details: `  🔑 DATABASE_URL — missing
+     Postgres connection string
+     dashboard: https://console.neon.tech
+     defined in: src/secrets.ts
+
+  Add to your .env file:
+
+    DATABASE_URL=`,
     },
   },
   custom: {
@@ -194,8 +182,8 @@ const env = validateSecrets(defineSecrets({
 
 const env = validateSecrets(defineSecrets({
   BOGUS_KEY: {
-    description: 'Internal rate-limiter service on CF Workers'
-      + ' — https://dash.cloudflare.com/workers/bogus',
+    description: 'Internal rate-limiter service on CF Workers',
+    dashboard: 'https://dash.cloudflare.com/workers/bogus',
     validate: 'str',
     example: 'bogus_live_abc123...',
   },
@@ -206,56 +194,33 @@ const res = await fetch('https://bogus-worker.workers.dev', {
 });`,
     highlightLines: [1, 3, 4, 5, 6, 7, 8, 9],
     terminal: {
-      error: '🔴 Missing 1 secret(s) [env=production]:',
-      details: `  ✗ BOGUS_KEY
-    Internal rate-limiter service on CF Workers
-    → https://dash.cloudflare.com/workers/bogus
-    example: bogus_live_abc123...
-    from: src/secrets.ts`,
-    },
-  },
-  ambiguous: {
-    label: 'Ambiguous keys',
-    subtitle: 'Clarify confusing env var names with descriptions',
-    code: `import { defineSecrets, validateSecrets } from 'secretdef';
-
-const env = validateSecrets(defineSecrets({
-  AWS_ACCESS_KEY_ID: {
-    description: 'Public identifier (not the secret!) — IAM → Users'
-      + ' → Security credentials — https://console.aws.amazon.com/iam',
-  },
-  AWS_SECRET_ACCESS_KEY: {
-    description: 'Private key (shown once at creation, cannot be retrieved'
-      + ' later) — rotate via IAM → Users → Security credentials',
-  },
-  AWS_REGION: {
-    description: 'Deployment region, e.g. us-east-1. Must match your'
-      + ' S3 bucket region — not the same as NEXT_PUBLIC_AWS_REGION',
-    devDefault: 'us-east-1',
-  },
-}));`,
-    highlightLines: [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
-    terminal: {
-      error: '🔴 Missing 2 secret(s) [env=production]:',
-      details: `  ✗ AWS_ACCESS_KEY_ID
-    Public identifier (not the secret!) — IAM → Users
-    → https://console.aws.amazon.com/iam
-    from: src/secrets.ts
-
-  ✗ AWS_SECRET_ACCESS_KEY
-    Private key (shown once at creation, cannot be
-    retrieved later) — rotate via IAM → Security credentials
-    from: src/secrets.ts
-
-  ✓ AWS_REGION — set`,
+      error: '❌ 1 secret problem [env=production]:',
+      details: `  🔑 BOGUS_KEY — missing
+     Internal rate-limiter service on CF Workers
+     dashboard: https://dash.cloudflare.com/workers/bogus
+     example: bogus_live_abc123...
+     defined in: src/secrets.ts`,
     },
   },
 } as const;
 
 export default function Page() {
-  const { packages } = useData<Data>();
-  const hasEnvVarsPackages = packages.filter(p => p.hasEnvVars);
-  const soonCount = packages.filter(p => !p.hasEnvVars).length;
+  const { packages, integrations } = useData<Data>();
+  const topOrder = [
+    'openai', 'anthropic', 'stripe', 'aws', 'google-genai',
+    'supabase', 'clerk', 'resend', 'vercel', 'cloudflare',
+    'firebase', 'twilio', 'sendgrid', 'github', 'sentry',
+    'auth0', 'redis', 'mongodb', 'postmark', 'groq',
+    'mistral', 'replicate', 'pinecone', 'neon', 'upstash',
+    'planetscale', 'datadog', 'algolia', 'contentful', 'sanity',
+    'shopify', 'slack', 'discord', 'linear', 'livekit',
+    'azure-openai', 'cohere', 'turso', 'deepgram', 'pusher',
+  ];
+  const topPackages = topOrder
+    .map(name => packages.find(p => p.name === name && p.top))
+    .filter(Boolean) as typeof packages;
+  const featuredPackages = packages.filter(p => p.featured && !p.top);
+  const totalCount = packages.length;
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-24">
@@ -265,54 +230,23 @@ export default function Page() {
 
       {/* Hero */}
       <div className="mb-6">
-        <Badge variant="secondary">@types for your env vars</Badge>
+        <Badge variant="secondary">Born from agentic chaos</Badge>
       </div>
 
       <h1 className="text-5xl font-extrabold tracking-tight text-foreground">
-        Your app has secret dependencies.{' '}
-        <span className="text-primary">Declare them</span>
+        Ship faster with{' '}
+        <span className="text-primary">declarative secrets</span>
       </h1>
 
-      <p className="mt-6 text-xl text-muted-foreground max-w-2xl">
-        Define required API keys, tokens, and connection strings.{' '}
-        Give your AI agent the context to fix everything.
-       
+      <p className="mt-4 text-lg text-muted-foreground max-w-2xl leading-relaxed">
+        Define what your app needs. Validate at startup. Get actionable errors instead of cryptic crashes.
       </p>
 
-      <p className="mt-3 text-sm text-muted-foreground italic">
-        Not a vault. Not a secrets manager. Works alongside Doppler, Vault, Infisical, or plain .env files.
-         {' '} 
-         <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">secretdef</code> is a standard way for modules to declare what they need
-        and where to get them.
-
-      </p>
-
-      <div className="mt-8">
+      <div className="mt-6">
         <InstallCommand command="npm i secretdef" />
       </div>
 
-      {/* Before/after comparison — #3 */}
-      <div className="mt-10 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-border bg-[#0d1117] p-4">
-          <div className="text-xs font-semibold text-red-400 uppercase tracking-wider mb-3">Without secretdef</div>
-          <pre className="font-mono text-sm text-gray-400 whitespace-pre-wrap leading-relaxed">
-{`TypeError: Cannot read properties
-of undefined (reading 'split')
-    at /app/src/billing.ts:14:23`}
-          </pre>
-        </div>
-        <div className="rounded-lg border border-primary/30 bg-[#0d1117] p-4">
-          <div className="text-xs font-semibold text-green-400 uppercase tracking-wider mb-3">With secretdef</div>
-          <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-<span className="text-red-400">{'  ✗ STRIPE_SECRET_KEY'}</span>
-{`    Stripe API secret key
-    → https://dashboard.stripe.com/apikeys
-    from: src/secrets.ts`}
-          </pre>
-        </div>
-      </div>
-
-      {/* Who it's for — #11 */}
+      {/* Who it's for */}
       <div className="mt-12 grid gap-3 sm:grid-cols-3">
         <div className="text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">Developers</span> — stop guessing which env vars your app needs
@@ -325,10 +259,136 @@ of undefined (reading 'split')
         </div>
       </div>
 
+      {/* Before/after comparison */}
+      <div className="mt-10 grid gap-4 sm:grid-cols-2">
+        {/* WITHOUT secretdef — browser console style */}
+        <div className="rounded-xl border border-red-500/30 bg-[#1e1e1e] overflow-hidden shadow-lg">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-[#333] bg-[#252526]">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-red-400">Without secretdef</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] text-gray-500">
+              <span className="px-1.5 py-0.5 rounded bg-[#333] text-gray-400">Console</span>
+            </div>
+          </div>
+          <div className="p-3 space-y-1">
+            {/* Error log line */}
+            <div className="flex items-start gap-2 rounded px-2 py-1.5 bg-red-500/10 border-l-2 border-red-500">
+              <span className="text-red-400 text-xs mt-0.5 shrink-0">✕</span>
+              <div className="font-mono text-xs leading-relaxed">
+                <span className="text-red-300 font-semibold">Uncaught TypeError</span>
+                <span className="text-red-300/80">: Cannot read properties of undefined (reading 'split')</span>
+                <div className="mt-1 text-gray-500">
+                  at processPayment (<span className="text-blue-400">billing.ts</span>:14:23)<br />
+                  at handleCheckout (<span className="text-blue-400">checkout.ts</span>:8:5)<br />
+                  at async Router.handle (<span className="text-blue-400">router.ts</span>:42:3)
+                </div>
+              </div>
+            </div>
+            {/* Second vague error */}
+            <div className="flex items-start gap-2 rounded px-2 py-1.5 bg-red-500/10 border-l-2 border-red-500">
+              <span className="text-red-400 text-xs mt-0.5 shrink-0">✕</span>
+              <div className="font-mono text-xs leading-relaxed">
+                <span className="text-red-300/80">POST /api/checkout </span>
+                <span className="text-red-400 font-semibold">500</span>
+                <span className="text-gray-500"> (Internal Server Error)</span>
+              </div>
+            </div>
+            {/* Sad empty state */}
+            <div className="pt-2 pb-1 text-center">
+              <p className="text-[10px] text-gray-600 italic">Which key? Where to get it? Good luck.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* WITH secretdef — browser console style */}
+        <div className="rounded-xl border border-primary/30 bg-[#1e1e1e] overflow-hidden shadow-lg">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-[#333] bg-[#252526]">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-green-400">With secretdef</span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] text-gray-500">
+              <span className="px-1.5 py-0.5 rounded bg-[#333] text-gray-400">Console</span>
+            </div>
+          </div>
+          <div className="p-3 space-y-1">
+            {/* Header log */}
+            <div className="flex items-start gap-2 rounded px-2 py-1.5 bg-red-500/10 border-l-2 border-red-500">
+              <span className="text-red-400 text-xs mt-0.5 shrink-0">✕</span>
+              <span className="font-mono text-xs text-red-300 font-semibold">1 secret problem [env=production]:</span>
+            </div>
+            {/* Secret detail */}
+            <div className="rounded px-2 py-2 bg-[#252526] border border-[#333]">
+              <div className="font-mono text-xs space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-red-400">🔑</span>
+                  <span className="text-white font-semibold">STRIPE_SECRET_KEY</span>
+                  <span className="text-gray-500">— missing</span>
+                </div>
+                <div className="pl-5 space-y-0.5 text-gray-400">
+                  <div>Stripe API secret key</div>
+                  <div>
+                    <span className="text-gray-500">dashboard: </span>
+                    <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline pointer-events-auto">
+                      https://dashboard.stripe.com/apikeys
+                    </a>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">defined in: </span>
+                    <span className="text-gray-300">src/secrets.ts</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Process exit */}
+            <div className="flex items-start gap-2 rounded px-2 py-1.5 bg-red-500/5 border-l-2 border-red-500/50">
+              <span className="text-red-400/60 text-xs mt-0.5 shrink-0">●</span>
+              <span className="font-mono text-xs text-red-400/70">Process exited with code 1</span>
+            </div>
+            {/* Happy state */}
+            <div className="pt-2 pb-1 text-center">
+              <p className="text-[10px] text-gray-500 italic">Name, description, link — fix it in seconds.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-4 text-sm text-muted-foreground italic">
+        Not a vault. Not a secrets manager. Works alongside Doppler, Vault, Infisical, or plain .env files.
+        Zero dependencies. ~2KB.
+      </p>
+
+      {/* Personal story */}
+      <div className="mt-12 mx-auto max-w-2xl rounded-xl border border-border bg-muted/30 px-8 py-6 text-center">
+        <p className="text-lg font-semibold text-foreground">
+          I ship code 10x faster now. So I debug 10x more missing secrets.
+        </p>
+        <div className="mt-4 space-y-3 text-sm text-muted-foreground leading-relaxed">
+          <p>
+            AI agents write integrations in minutes. Stripe, Resend, a new database — done before lunch.
+            But every deploy became the same loop: crash, check logs, guess which env var is missing,
+            find the right dashboard, provision the key, redeploy.
+          </p>
+          <p>
+            I tried <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">infra.md</code>,
+            then <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">CLAUDE.md</code>, then Notion.
+            None of it was <em>there</em> when I needed it — in the terminal, at the moment of failure.
+            My agents couldn't read any of it.
+          </p>
+          <p>
+            So I put the documentation <em>in the code</em>. One call at startup validates everything.
+            The error message <em>is</em> the documentation — for me, for my agent, for the next person who touches this codebase.
+          </p>
+        </div>
+        <p className="mt-4 text-xs text-muted-foreground">
+          — <a href="https://x.com/iplanwebsites" className="text-primary hover:underline">Felix Menard</a>, creator of secretdef
+        </p>
+      </div>
+
       {/* Quick start */}
       <QuickStartBlock />
 
-      {/* Problem cards — #6 sharpened copy + #10 4th card */}
+      {/* Problem cards */}
       <div className="mt-12 grid gap-4 sm:grid-cols-2">
         <ProblemCard
           icon={<Shield className="h-5 w-5 text-destructive" />}
@@ -399,19 +459,22 @@ of undefined (reading 'split')
         </h3>
         <div className="mt-4">
           <TerminalBlock>
-            <div className="text-red-400">{'🔴 Missing 2 secret(s) [env=production]:'}</div>
+            <div className="text-red-400">{'❌ 2 secret problems [env=production]:'}</div>
             <div className="text-gray-300 mt-2">
-              {'  ✗ STRIPE_SECRET_KEY'}<br />
-              {'    Stripe API secret key. Starts with sk_live_ (not pk_).'}<br />
-              {'    → https://dashboard.stripe.com/apikeys'}<br />
-              {'    from: src/secrets.ts'}<br />
+              {'  🔑 STRIPE_SECRET_KEY — missing'}<br />
+              {'     Stripe API secret key'}<br />
+              {'     dashboard: https://dashboard.stripe.com/apikeys'}<br />
+              {'     defined in: src/secrets.ts'}<br />
               <br />
-              {'  ✗ DATABASE_URL'}<br />
-              {'    Postgres connection string — format: postgresql://user:pass@host/db'}<br />
-              {'    from: src/modules/db/secrets.ts'}
+              {'  🔑 DATABASE_URL — missing'}<br />
+              {'     Postgres connection string'}<br />
+              {'     dashboard: https://console.neon.tech'}<br />
+              {'     defined in: src/modules/db/secrets.ts'}
             </div>
-            <div className="text-green-400 mt-2">
-              {'  ✓ STRIPE_WEBHOOK_SECRET — set  (from: src/secrets.ts)'}
+            <div className="text-gray-400 mt-2">
+              {'  Add to your .env file:'}<br />
+              {'    STRIPE_SECRET_KEY='}<br />
+              {'    DATABASE_URL='}
             </div>
           </TerminalBlock>
         </div>
@@ -480,49 +543,30 @@ of undefined (reading 'split')
         </div>
       </div>
 
-      {/* SDK example with tabs */}
-      <SdkExampleBlock />
-
-      {/* AI agents — #4 elevated to full section */}
+      {/* Dashboard UI */}
       <div className="mt-16">
         <h2 className="text-3xl font-bold text-foreground flex items-center gap-3">
-          <Cpu className="h-7 w-7 text-primary" />
-          Built for AI agents
+          <Monitor className="h-7 w-7 text-primary" />
+          Dashboard UI
         </h2>
         <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-          Claude Code, Cursor, Codex, and Gemini CLI generate integrations fast — but crash
-          on missing env vars with zero context. secretdef gives them structured errors
-          they can read and act on.
+          See all your secrets at a glance. One command.
         </p>
-
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="rounded-lg border border-border p-5 bg-card">
-            <div className="text-sm font-semibold text-destructive uppercase tracking-wider mb-3">Without secretdef</div>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>1. Agent generates Stripe integration</p>
-              <p>2. <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">TypeError: Cannot read properties of undefined</code></p>
-              <p>3. Agent retries blindly, no context</p>
-              <p>4. Fails again — human intervenes</p>
-            </div>
-          </div>
-          <div className="rounded-lg border border-primary/30 p-5 bg-primary/5">
-            <div className="text-sm font-semibold text-green-600 dark:text-green-400 uppercase tracking-wider mb-3">With secretdef</div>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>1. Agent generates Stripe integration</p>
-              <p>2. Structured error: var name + description + dashboard URL</p>
-              <p>3. Agent reads error, knows exactly what's needed</p>
-              <p>4. Agent self-resolves — continues building</p>
-            </div>
-          </div>
+        <div className="mt-4">
+          <InstallCommand command="npx secretdef ui" />
         </div>
-
-        <p className="mt-4 text-sm text-muted-foreground">
-          Use the <a href="#quick-start" className="text-primary hover:underline">Quick start prompt</a> above to
-          add secretdef to any project with a single paste.
+        <div className="mt-6">
+          <UiPreview />
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground italic">
+          This is a preview — run <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">npx secretdef ui</code> for the real thing.
         </p>
       </div>
 
-      {/* Rich errors everywhere — #9 merged useSecret + description examples */}
+      {/* SDK example with tabs */}
+      <SdkExampleBlock />
+
+      {/* useSecret() — point-of-use errors */}
       <div className="mt-16">
         <h2 className="text-3xl font-bold text-foreground">
           Every error tells you how to fix it
@@ -530,35 +574,14 @@ of undefined (reading 'split')
         <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
           <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">process.env.KEY</code> returns <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">undefined</code> silently.{' '}
           <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">useSecret('KEY')</code> tells
-          you what's wrong, where to find the value, and which file declared the requirement.
+          you what's wrong, where to find the value, and which file declared it. Your agent reads the same output and knows exactly what to do.
         </p>
         <div className="mt-4">
           <CodeBlock code={useSecretCode} language="typescript" filename="src/modules/stripe/client.ts" />
         </div>
-
-        <p className="mt-6 text-sm text-muted-foreground">
-          The descriptions you write show up verbatim in error output.
-          A dashboard link and a format hint turn a debugging session into a copy-paste fix.
-          These descriptions aren't just for humans — when Claude Code hits a missing secret, it reads this and knows exactly what to do.
-        </p>
-
-        <div className="mt-4 space-y-3">
-          <DescriptionExample
-            envVar="STRIPE_SECRET_KEY"
-            description="Stripe API secret key. Starts with sk_live_ (prod) or sk_test_ (dev). Not the publishable key (pk_). Provision at https://dashboard.stripe.com/apikeys — requires Admin role."
-          />
-          <DescriptionExample
-            envVar="CLERK_SECRET_KEY"
-            description="Clerk backend API key. Starts with sk_live_ or sk_test_. Dashboard: https://dashboard.clerk.com → API Keys. Not the publishable frontend key (pk_)."
-          />
-          <DescriptionExample
-            envVar="DATABASE_URL"
-            description="Postgres connection string, format: postgresql://user:pass@host:5432/db. Neon: https://console.neon.tech → Connection Details. Supabase: Settings → Database → URI. Use the pooler URL for serverless."
-          />
-        </div>
       </div>
 
-      {/* Modules should declare their secrets — #8 only show hasEnvVars packages */}
+      {/* Modules should declare their secrets */}
       <div className="mt-16">
         <h2 className="text-3xl font-bold text-foreground flex items-center gap-3">
           <Blocks className="h-7 w-7 text-primary" />
@@ -570,26 +593,39 @@ of undefined (reading 'split')
           the whole app's requirements become discoverable, validated, and documented — automatically.
         </p>
         <p className="mt-3 text-muted-foreground">
-          For services that don't ship their own definitions yet, the community maintains
-          ready-made <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">@secretdef/*</code> packages:
+          For services that don't ship their own definitions yet, the community maintains{' '}
+          <span className="text-foreground font-semibold">{totalCount.toLocaleString()}+</span>{' '}
+          ready-made <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">@secretdef/*</code> packages.
+          Here are some popular ones:
         </p>
 
+        {/* Top-tier: rich cards */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {hasEnvVarsPackages.map((pkg) => (
-            <SdkPackage key={pkg.name} name={pkg.name} title={pkg.title} npm={pkg.npm} hasEnvVars={pkg.hasEnvVars} />
+          {topPackages.map((pkg) => (
+            <SdkPackage key={pkg.name} name={`@secretdef/${pkg.name}`} title={pkg.title} npm={pkg.npm!} />
           ))}
         </div>
 
-        {soonCount > 0 && (
-          <p className="mt-4 text-sm text-muted-foreground">
-            +{soonCount} more packages coming soon.{' '}
-            <a
-              href="https://github.com/iplanwebsites/secretdef/edit/main/registry.yaml"
-              className="text-primary hover:underline"
-            >
-              Add yours
-            </a>
-          </p>
+        {/* Remaining featured: compact multi-column text list */}
+        {featuredPackages.length > 0 && (
+          <div className="mt-6">
+            <p className="text-sm text-muted-foreground mb-3">
+              Plus {featuredPackages.length} more verified packages:
+            </p>
+            <div className="columns-2 sm:columns-3 lg:columns-4 gap-x-4">
+              {featuredPackages.map((pkg) => (
+                <a
+                  key={pkg.name}
+                  href={`https://www.npmjs.com/package/@secretdef/${pkg.name}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-sm text-muted-foreground hover:text-foreground transition-colors py-0.5 truncate"
+                >
+                  {pkg.title || pkg.name}
+                </a>
+              ))}
+            </div>
+          </div>
         )}
 
         <div className="mt-6 rounded-lg border border-primary/20 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
@@ -598,11 +634,88 @@ of undefined (reading 'split')
             Open a PR to add it to the supported list — help others discover it.
           </p>
           <a
-            href="https://github.com/iplanwebsites/secretdef/edit/main/registry.yaml"
+            href="https://github.com/iplanwebsites/secretdef/edit/main/apps/web/data/integrations.json"
             className="inline-flex items-center gap-2 shrink-0 rounded-lg bg-primary px-4 py-2 text-sm text-primary-foreground font-semibold hover:bg-primary/90 transition"
           >
             Add your service <ArrowRight className="h-3.5 w-3.5" />
           </a>
+        </div>
+      </div>
+
+      {/* Native integrations */}
+      {integrations.length > 0 && (
+        <div className="mt-16">
+          <h2 className="text-3xl font-bold text-foreground flex items-center gap-3">
+            <Blocks className="h-7 w-7 text-green-500" />
+            Native integrations
+          </h2>
+          <p className="mt-3 text-muted-foreground max-w-2xl">
+            These libraries ship their own <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">defineSecrets()</code> calls
+            natively — just install and import, no <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">@secretdef/*</code> package needed.
+          </p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {integrations.map((integration) => (
+              <div
+                key={integration.name}
+                className="flex flex-col rounded-lg border border-green-500/30 px-3 py-2.5 bg-card gap-1.5"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-semibold text-foreground">{integration.title}</span>
+                  <span className="text-[10px] font-semibold text-green-500 border border-green-500/30 rounded px-1.5 py-0.5">Native</span>
+                </div>
+                <p className="text-xs text-muted-foreground">{integration.description}</p>
+                <div className="flex gap-3 text-xs text-muted-foreground font-mono">
+                  <a href={`https://www.npmjs.com/package/${integration.npm}`} target="_blank" rel="noopener noreferrer" className="truncate hover:text-foreground transition-colors">{integration.npm}</a>
+                  {integration.repo && (
+                    <a href={`https://github.com/${integration.repo}`} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors flex items-center gap-1">
+                      <Github className="h-3 w-3" /> repo
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 rounded-lg border border-green-500/20 bg-green-500/5 p-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+            <p className="text-sm text-muted-foreground flex-1">
+              Ship your own secret definitions? Add your library to the list.
+            </p>
+            <a
+              href="https://github.com/iplanwebsites/secretdef/edit/main/apps/web/data/integrations.json"
+              className="inline-flex items-center gap-2 shrink-0 rounded-lg bg-green-600 px-4 py-2 text-sm text-white font-semibold hover:bg-green-700 transition"
+            >
+              Add your library <ArrowRight className="h-3.5 w-3.5" />
+            </a>
+          </div>
+        </div>
+      )}
+
+      {/* Full community package directory */}
+      <div className="mt-16">
+        <h2 className="text-3xl font-bold text-foreground flex items-center gap-3">
+          <Package className="h-7 w-7 text-primary" />
+          {totalCount.toLocaleString()} community packages
+        </h2>
+        <p className="mt-3 text-muted-foreground max-w-2xl">
+          Every service below has a ready-made <code className="text-sm bg-muted px-1.5 py-0.5 rounded font-mono">@secretdef/*</code> package
+          you can install today. Each one declares the environment variables the service needs — descriptions, dashboard links, and validation rules included.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-1.5">
+          {packages.map((pkg) => (
+            <a
+              key={pkg.name}
+              href={`https://www.npmjs.com/package/@secretdef/${pkg.name}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "inline-block text-xs font-mono px-2 py-1 rounded-md border transition-colors",
+                pkg.featured
+                  ? "border-primary/30 text-foreground hover:border-primary/60 hover:bg-primary/5"
+                  : "border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/40 hover:bg-primary/5"
+              )}
+            >
+              {pkg.name}
+            </a>
+          ))}
         </div>
       </div>
 
@@ -629,11 +742,21 @@ of undefined (reading 'split')
 
       <div className="mt-16">
         <p className="text-sm text-muted-foreground text-center">
-          Zero-dependency. ~2KB. Works alongside Doppler, Vault, AWS Secrets Manager, or plain .env files.
+          Zero dependencies. ~2KB. MIT licensed.
         </p>
       </div>
     </div>
   );
+}
+
+
+function generatePrompt(name: string, npm: string) {
+  return `Install ${name} and wire it into this codebase:
+1. npm i secretdef ${name}
+2. Find where "${npm}" is imported and process.env is used for its config. Import the secrets from "${name}" and use them instead of raw process.env access.
+3. In the server/app entry point, import validateSecrets from "secretdef" and call it with the imported secrets so missing keys are caught at startup — not at runtime.
+
+This requires editing at least 2 files: where the SDK is used, and the app entry point.`;
 }
 
 function ProblemCard({
@@ -660,16 +783,7 @@ function ProblemCard({
   );
 }
 
-function generatePrompt(name: string, npm: string) {
-  return `Install ${name} and wire it into this codebase:
-1. npm i secretdef ${name}
-2. Find where "${npm}" is imported and process.env is used for its config. Import the secrets from "${name}" and use them instead of raw process.env access.
-3. In the server/app entry point, import validateSecrets from "secretdef" and call it with the imported secrets so missing keys are caught at startup — not at runtime.
-
-This requires editing at least 2 files: where the SDK is used, and the app entry point.`;
-}
-
-function SdkPackage({ name, title, npm, hasEnvVars }: { name: string; title?: string; npm: string; hasEnvVars?: boolean }) {
+function SdkPackage({ name, title, npm }: { name: string; title?: string; npm: string }) {
   const [copied, setCopied] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -681,20 +795,6 @@ function SdkPackage({ name, title, npm, hasEnvVars }: { name: string; title?: st
       setTimeout(() => setCopied(false), 1500);
     } catch { /* */ }
   };
-
-  if (!hasEnvVars) {
-    return (
-      <div className="flex flex-col rounded-lg border border-border/50 px-3 py-2.5 bg-card gap-1.5 opacity-50">
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-sm font-semibold text-foreground">{title || name}</span>
-          <span className="shrink-0 text-[10px] uppercase tracking-wider text-muted-foreground border border-border rounded px-1.5 py-0.5">soon</span>
-        </div>
-        <span className="text-xs text-muted-foreground font-mono truncate">
-          <a href={`https://www.npmjs.com/package/${npm}`} target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">{npm}</a>
-        </span>
-      </div>
-    );
-  }
 
   return (
     <div className="flex flex-col rounded-lg border border-primary/30 px-3 py-2.5 bg-card gap-1.5">
@@ -837,7 +937,7 @@ type SdkKey = keyof typeof sdkExamples;
 const sdkKeys = Object.keys(sdkExamples) as SdkKey[];
 
 function SdkExampleBlock() {
-  const [active, setActive] = useState<SdkKey>('resend');
+  const [active, setActive] = useState<SdkKey>('openai');
   const example = sdkExamples[active];
 
   return (
@@ -904,11 +1004,3 @@ function SdkExampleBlock() {
   );
 }
 
-function DescriptionExample({ envVar, description }: { envVar: string; description: string }) {
-  return (
-    <div className="bg-[#0d1117] rounded-xl p-4 border border-border">
-      <div className="text-xs font-mono text-primary font-semibold">{envVar}</div>
-      <p className="mt-1 text-sm font-mono text-gray-400 leading-relaxed">{description}</p>
-    </div>
-  );
-}

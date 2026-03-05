@@ -9,7 +9,8 @@ import { defineSecrets, validateSecrets } from 'secretdef';
 
 const secrets = defineSecrets({
   STRIPE_SECRET_KEY: {
-    description: 'Stripe API secret key — https://dashboard.stripe.com/apikeys',
+    description: 'Stripe API secret key',
+    dashboard: 'https://dashboard.stripe.com/apikeys',
     example: 'sk_live_...',
     validate: 'str',
   },

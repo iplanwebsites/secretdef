@@ -6,7 +6,7 @@ Run any example with `npx tsx`:
 # Auto-register style (easy)
 npx tsx example/auto-register.ts
 
-# Explicit spreading (no global state)
+# Explicit spreading (full control)
 npx tsx example/explicit.ts
 
 # With @secretdef/stripe community package

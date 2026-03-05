@@ -1,0 +1,10 @@
+[
+  {
+    "name": "secretdef",
+    "title": "secretdef",
+    "npm": "secretdef",
+    "description": "The core secretdef library — define, validate, and access your environment secrets.",
+    "repo": "iplanwebsites/secretdef",
+    "website": "https://secretdef.com"
+  }
+]

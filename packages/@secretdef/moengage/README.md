@@ -1,0 +1,32 @@
+# @secretdef/moengage
+
+Like `@types` but for environment variables — so your app (and AI coding agents) know exactly which secrets are needed before runtime.
+
+Pre-built [secretdef](https://www.npmjs.com/package/secretdef) definitions for **MoEngage** environment variables.
+
+## Install
+
+```bash
+npm install @secretdef/moengage secretdef
+```
+
+## Usage
+
+```ts
+import { validateSecrets } from 'secretdef';
+import '@secretdef/moengage';
+
+validateSecrets();
+```
+
+## Secrets
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `MOENGAGE_APP_ID` | MoEngage app ID | Yes |
+| `MOENGAGE_API_KEY` | MoEngage API key | Yes |
+
+## Links
+
+- [secretdef.com](https://secretdef.com) — Full documentation
+- [secretdef on npm](https://www.npmjs.com/package/secretdef) — Core library

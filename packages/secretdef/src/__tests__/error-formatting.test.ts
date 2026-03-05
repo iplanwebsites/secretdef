@@ -51,6 +51,34 @@ describe('SecretNotAvailableError', () => {
     expect(err.message).toContain('Stripe API key');
   });
 
+  it('uses dashboard field for "Where to find it" line', () => {
+    const err = new SecretNotAvailableError(
+      'STRIPE_SECRET_KEY',
+      {
+        description: 'Stripe API key',
+        dashboard: 'https://dashboard.stripe.com/apikeys',
+      },
+      'production',
+    );
+    expect(err.message).toContain('Where to find it:');
+    expect(err.message).toContain('https://dashboard.stripe.com/apikeys');
+    expect(err.message).toContain('Stripe API key');
+    // Description should not have URL extracted from it
+    expect(err.message).toContain('Description:          Stripe API key');
+  });
+
+  it('uses dashboard field even without description', () => {
+    const err = new SecretNotAvailableError(
+      'MY_KEY',
+      {
+        dashboard: 'https://example.com/keys',
+      },
+      'production',
+    );
+    expect(err.message).toContain('Where to find it:');
+    expect(err.message).toContain('https://example.com/keys');
+  });
+
   it('handles description without URL', () => {
     const err = new SecretNotAvailableError(
       'MY_KEY',
@@ -81,7 +109,7 @@ describe('SecretNotAvailableError', () => {
       'src/secrets.ts',
     );
     expect(err.message).toContain('src/secrets.ts');
-    expect(err.message).toContain('Registered by:');
+    expect(err.message).toContain('Defined in:');
   });
 
   it('omits registeredBy when not provided', () => {
@@ -90,7 +118,7 @@ describe('SecretNotAvailableError', () => {
       {},
       'production',
     );
-    expect(err.message).not.toContain('Registered by:');
+    expect(err.message).not.toContain('Defined in:');
   });
 
   it('uses overridden env var name from environments', () => {

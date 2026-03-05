@@ -18,6 +18,9 @@
       }
     }
   },
+  "bin": {
+    "secretdef": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "skills",

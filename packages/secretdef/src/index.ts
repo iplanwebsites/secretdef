@@ -9,6 +9,7 @@ export { useSecret, SecretNotAvailableError, SecretValidationError } from './acc
 export { enableAutoRegister, getRegistry, clearRegistry } from './registry.js';
 export { builtinValidators } from './validators.js';
 export { normalizeSpecs } from './normalize.js';
+export { findProjectRoot, listGeneratedFiles } from './generated.js';
 
 /**
  * Declares secret requirements. Always returns normalized SecretSpec objects

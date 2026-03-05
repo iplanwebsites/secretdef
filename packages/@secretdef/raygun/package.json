@@ -1,0 +1,48 @@
+{
+  "name": "@secretdef/raygun",
+  "version": "0.0.1",
+  "description": "Secret definitions for Raygun",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "clean": "rm -rf dist"
+  },
+  "peerDependencies": {
+    "secretdef": ">=0.0.3"
+  },
+  "devDependencies": {
+    "secretdef": "workspace:*",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.0"
+  },
+  "license": "MIT",
+  "homepage": "https://secretdef.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iplanwebsites/secretdef",
+    "directory": "packages/@secretdef/raygun"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": true
+}
