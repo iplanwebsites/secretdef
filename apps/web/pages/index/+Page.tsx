@@ -383,7 +383,7 @@ export default function Page() {
             So I put the documentation <em>in the code</em>. A spec that says: this app needs{' '}
             <code className="text-xs bg-muted px-1 py-0.5 rounded font-mono">STRIPE_SECRET_KEY</code>,
             here's what it looks like, here's where to get it. One call at startup validates everything.
-            The error message <em>is</em> the documentation — for me, for my agent, for the next person who touches this codebase.
+            The error message <em>is</em> the documentation — for Claude, for me in 2 years, or the next dev working on this.
           </p>
         </div>
         <p className="mt-4 text-xs text-muted-foreground">
