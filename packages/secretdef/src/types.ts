@@ -42,6 +42,9 @@ export interface RegisteredSecret extends SecretSpec {
 
 export interface ValidateOptions {
   mode?: 'error' | 'warn';
+  /** Custom env source object (e.g. `c.env` in Cloudflare Workers / Hono).
+   *  When omitted, auto-detects `process.env` if available. */
+  env?: Record<string, unknown>;
 }
 
 /** Extracts a typed env object from defineSecrets output. Maps every key to string. */

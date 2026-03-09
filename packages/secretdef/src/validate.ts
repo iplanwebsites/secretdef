@@ -2,6 +2,7 @@ import type { SecretSpec, ValidateOptions } from './types.js';
 import { getRegistry } from './registry.js';
 import { resolveSecret, type ResolvedInfo } from './resolve.js';
 import { writeGeneratedJson } from './generated.js';
+import { detectEnvSource } from './env-detect.js';
 
 export interface ValidatedSecrets {
   [key: string]: string;
@@ -11,17 +12,45 @@ export interface ValidatedSecrets {
  * Validates secrets and returns a resolved key→value map.
  *
  * Accepts an explicit specs map, or falls back to the auto-registry.
+ * Pass `{ env: c.env }` in options to read from edge runtime bindings instead of `process.env`.
+ *
  * In production: missing required secrets → print error table → process.exit(1)
  * In other envs: missing required secrets → print warning table → continue
+ *
+ * @example
+ * ```ts
+ * // Node.js — uses process.env automatically
+ * validateSecrets(specs);
+ *
+ * // Cloudflare Workers — pass env source
+ * validateSecrets(specs, { env: c.env });
+ * ```
  */
 export function validateSecrets(
   secrets?: Record<string, SecretSpec>,
-  env?: string,
+  envOrOptions?: string | ValidateOptions,
   options?: ValidateOptions,
 ): ValidatedSecrets {
-  const currentEnv = env ?? process.env.NODE_ENV ?? 'development';
+  // Support both old signature (secrets, envString, options) and new (secrets, options)
+  let currentEnvName: string | undefined;
+  let opts: ValidateOptions | undefined;
+
+  if (typeof envOrOptions === 'string') {
+    // Old-style: validateSecrets(specs, "production", { mode: "warn" })
+    currentEnvName = envOrOptions;
+    opts = options;
+  } else if (typeof envOrOptions === 'object') {
+    // New-style: validateSecrets(specs, { env: c.env, mode: "error" })
+    opts = envOrOptions;
+  } else {
+    opts = options;
+  }
+
+  const envSource = detectEnvSource(opts?.env);
+  const currentEnv = currentEnvName ?? envSource['NODE_ENV'] ?? 'development';
   const isProduction = currentEnv === 'production';
-  const mode = options?.mode ?? (isProduction ? 'error' : 'warn');
+  const mode = opts?.mode ?? (isProduction ? 'error' : 'warn');
+  const hasProcessExit = typeof process !== 'undefined' && typeof process.exit === 'function';
 
   // Build the source: explicit map or auto-registry
   const entries: Array<{ key: string; spec: SecretSpec; registeredBy?: string }> = [];
@@ -44,7 +73,7 @@ export function validateSecrets(
   const resolved: ValidatedSecrets = {};
 
   for (const { key, spec, registeredBy } of entries) {
-    const info = resolveSecret(key, spec, currentEnv, process.env, registeredBy);
+    const info = resolveSecret(key, spec, currentEnv, envSource, registeredBy);
     allInfos.push(info);
     if (info.missing) {
       missing.push(info);
@@ -57,9 +86,9 @@ export function validateSecrets(
     }
   }
 
-  // Write generated.json snapshot in non-production environments
+  // Write generated.json snapshot in non-production environments (Node.js only)
   // Set DISABLE_SECRETDEF_UI=1 to skip writing the snapshot file
-  if (!isProduction && !process.env.DISABLE_SECRETDEF_UI) {
+  if (!isProduction && hasProcessExit && !envSource['DISABLE_SECRETDEF_UI']) {
     try {
       writeGeneratedJson(entries, allInfos, currentEnv);
     } catch {
@@ -79,7 +108,18 @@ export function validateSecrets(
 
   if (mode === 'error') {
     printErrorTable(missing, invalid, currentEnv);
-    process.exit(1);
+    if (hasProcessExit) {
+      process.exit(1);
+    } else {
+      // Edge runtime — throw instead of process.exit
+      const lines = problems.map((p) => {
+        const reason = p.missing ? 'missing' : `invalid: ${p.validationError}`;
+        return `  ${p.envVar} — ${reason}`;
+      });
+      throw new Error(
+        `secretdef: ${problems.length} secret ${problems.length === 1 ? 'problem' : 'problems'} [env=${currentEnv}]:\n${lines.join('\n')}`,
+      );
+    }
   } else {
     printWarningTable(missing, invalid, optionalMissing, currentEnv);
   }
