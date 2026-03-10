@@ -6,10 +6,13 @@ export type { SecretSpec, SecretInput, RegisteredSecret, ValidateOptions, Builti
 export { validateSecrets } from './validate.js';
 export type { ValidatedSecrets } from './validate.js';
 export { useSecret, SecretNotAvailableError, SecretValidationError } from './accessor.js';
+export type { UseSecretOptions } from './accessor.js';
 export { enableAutoRegister, getRegistry, clearRegistry } from './registry.js';
 export { builtinValidators } from './validators.js';
 export { normalizeSpecs } from './normalize.js';
 export { findProjectRoot, listGeneratedFiles } from './generated.js';
+export { createSecretAccessor } from './create-accessor.js';
+export { detectEnvSource } from './env-detect.js';
 
 /**
  * Declares secret requirements. Always returns normalized SecretSpec objects

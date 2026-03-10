@@ -1,17 +1,36 @@
 import type { SecretSpec, RegisteredSecret } from './types.js';
 import { getRegistry } from './registry.js';
 import { resolveSecret } from './resolve.js';
+import { detectEnvSource } from './env-detect.js';
+
+export interface UseSecretOptions {
+  /** Custom env source object (e.g. `c.env` in Cloudflare Workers / Hono).
+   *  When omitted, auto-detects `process.env` if available. */
+  env?: Record<string, unknown>;
+}
 
 /**
  * Reads a single secret by key. Throws a structured, actionable error if missing.
  *
- * Pass an explicit resolved map, or omit to fall back to the auto-registry.
+ * Pass an explicit specs map, or omit to fall back to the auto-registry.
+ * Pass `{ env: c.env }` to read from edge runtime bindings instead of `process.env`.
+ *
+ * @example
+ * ```ts
+ * // Node.js — uses process.env automatically
+ * useSecret("MY_KEY", specs);
+ *
+ * // Cloudflare Workers — pass env source
+ * useSecret("MY_KEY", specs, { env: c.env });
+ * ```
  */
 export function useSecret(
   key: string,
   resolvedMap?: Record<string, SecretSpec>,
+  options?: UseSecretOptions,
 ): string {
-  const env = process.env.NODE_ENV ?? 'development';
+  const envSource = detectEnvSource(options?.env);
+  const env = getNodeEnv(envSource);
 
   // If an explicit map is passed, look up from it
   if (resolvedMap) {
@@ -22,7 +41,7 @@ export function useSecret(
           `It is not present in the passed secrets map.`
       );
     }
-    const info = resolveSecret(key, spec, env);
+    const info = resolveSecret(key, spec, env, envSource);
     if (info.validationError) {
       throw new SecretValidationError(key, spec, env, info.validationError);
     }
@@ -42,12 +61,16 @@ export function useSecret(
     );
   }
 
-  const info = resolveSecret(key, registered, env, process.env, registered.registeredBy);
+  const info = resolveSecret(key, registered, env, envSource, registered.registeredBy);
   if (info.validationError) {
     throw new SecretValidationError(key, registered, env, info.validationError, registered.registeredBy);
   }
   if (info.value !== undefined) return info.value;
   throw new SecretNotAvailableError(key, registered, env, registered.registeredBy);
+}
+
+function getNodeEnv(envSource: Record<string, string | undefined>): string {
+  return envSource['NODE_ENV'] ?? 'development';
 }
 
 export class SecretValidationError extends Error {
