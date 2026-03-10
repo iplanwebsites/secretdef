@@ -1,5 +1,5 @@
 import { usePageContext } from 'vike-react/usePageContext';
-import { Logo } from '../components/logo';
+import { Logo } from '../../components/logo';
 
 export default function ErrorPage() {
   const pageContext = usePageContext();
