@@ -11,6 +11,16 @@ export { builtinValidators } from './validators.js';
 export { normalizeSpecs } from './normalize.js';
 export { findProjectRoot, listGeneratedFiles } from './generated.js';
 
+// Edge runtime support (Cloudflare Workers, Deno Deploy, etc.)
+export {
+  validateSecretsEdge,
+  useSecretEdge,
+  createEdgeAccessor,
+  EdgeSecretValidationError,
+  EdgeSecretNotAvailableError,
+} from './edge.js';
+export type { EdgeValidateOptions, EdgeValidationError, EdgeValidatedSecrets } from './edge.js';
+
 /**
  * Declares secret requirements. Always returns normalized SecretSpec objects
  * and auto-registers them to the global registry.
